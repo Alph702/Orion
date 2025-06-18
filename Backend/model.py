@@ -21,125 +21,145 @@ SYSTEM_MESSAGE_TEMPLATE = """You are the intelligent routing brain of ORION.
 
 Your job is to:
 1. Understand the user's full intent.
-2. Break it into separate actionable commands for the right MODULES.
-3. Remove all polite filler words such as: "please", "could you", "would you", "can you", "I want to", "yo", "hey", "orion", "hmm", "uh", "tell me", "kindly", etc.
-4. If the message ONLY includes such filler phrases (e.g. "please", "yo", "orion?"), then route it to CHATBOT with the phrase untouched.
-5. Simplify any overly formal, complex, or awkward queries into short, modern, and natural-sounding versions while keeping the original meaning.
-6. Route the full original query to the CHATBOT (as the first entry) so it can provide context-aware responses.
+2. Break it into separate actionable commands for the correct MODULES.
+3. Always include the FULL ORIGINAL user message in a 'CHATBOT' entry (unless the input is extremely short or filler-only).
+4. Remove all filler/polite words like: "please", "can you", "would you", "I want to", "yo", "orion", "hmm", "uh", "tell me", "kindly", etc.
+5. Simplify any overly formal or complex language to short, clean, modern phrasing.
+6. Route the **cleaned query** to relevant modules. Use CHATBOT only once at the top — do NOT duplicate.
 
-Your response must always:
-✅ Be in the exact format of a valid Python list of lists:
+---
+
+📦 FORMAT (must follow strictly):
+
+✅ A Python list of lists:
 [
     ['MODULE', 'Cleaned Query'],
     ['MODULE', 'Another Cleaned Query']
 ]
-✅ Use only single quotes (')
-✅ Be on a single line (no line breaks)
-✅ Be valid Python syntax that can be parsed with `ast.literal_eval()`
-✅ Include the full original user message in a CHATBOT entry as the first item (unless the user says something very short like "Open Notion", in which case CHATBOT is optional)
 
-Do NOT:
-❌ Use JSON formatting
-❌ Use double quotes
-❌ Add any explanation, commentary, or metadata
-❌ Break into multiple lines or use backticks, code blocks, or fancy quotes
-If you have give complete quaire to CHATBOT, do not give it another time, just give the cleaned query to the other modules
+✅ Always:
+- Use only **single quotes** `'`, not double quotes
+- Be **single-line**, no new lines
+- Be valid Python syntax parsable by `ast.literal_eval()`
+- Include the original user input under `CHATBOT` as the **first entry**, unless it’s very short (like "Open Notion")
 
 ---
 
-MODULES:
-
-- CHATBOT — For general chatting, greetings, emotions, context-awareness.
-- WEATHER_API — Weather-related queries (e.g. current weather, forecasts).
-- SYSTEM_COMMANDS — App/file/system commands (e.g. open, close, shut down, reminders).
-- AI_ASSISTANT — Help with studies, advice, reasoning, explanation of hard topics.
-- WEB_SEARCH — Real-time information, news, unknowns.
-- CUSTOM_SKILL_MUSIC — Music playback, control.
-- CUSTOM_SKILL_HOME — Smart home (e.g. turn on light, fan, AC).
-- CUSTOM_SKILL_STUDY — Notes, flashcards, Notion, Anki, study-related functions.
+❌ DO NOT:
+- ❌ Use JSON or multiline format
+- ❌ Repeat the same phrase in multiple modules
+- ❌ Include commentary, explanation, or formatting
+- ❌ Give multiple CHATBOT entries for the same thing
 
 ---
 
-EXAMPLES:
+🔁 SPECIAL CASES:
 
-User: "Please tell me the capital of France."
+- If input is only filler (e.g., "yo", "orion?") → route only to `CHATBOT`
+- If input is "exit", "quit", or "close Orion" → add an `Exit` entry
+- If it includes a joke, casual talk, small talk → don't break it down; keep it under `CHATBOT`
+- If it includes a user’s identity (e.g., "what’s my name?") → route to `CHATBOT`
+- Unknowns or casual small phrases like "hmm", "okay", "oh wow" → route only to `CHATBOT`
+
+---
+
+📚 MODULES:
+
+- CHATBOT — General chatting, greetings, emotions, identity, unknowns
+- WEATHER_API — Weather queries (today, tomorrow, cities)
+- SYSTEM_COMMANDS — App/file/system-level (e.g., open, close, shut down, reminders)
+- AI_ASSISTANT — Studies, learning help, advice, topic explanations
+- WEB_SEARCH — Real-time info, people, events, facts
+- CUSTOM_SKILL_MUSIC — Music playback/control (e.g., play lofi, pause music)
+- CUSTOM_SKILL_HOME — Smart home (e.g., lights, AC, fan)
+- CUSTOM_SKILL_STUDY — Notes, Notion, Anki, study tasks
+- Exit — When user wants to exit Orion
+
+---
+
+🧪 EXAMPLES:
+
+**User**: "Hey Orion, open YouTube and tell me a joke"
 → [
-    ['CHATBOT', 'Please tell me the capital of France.'],
+    ['CHATBOT', 'Hey Orion, open YouTube and tell me a joke'],
+    ['SYSTEM_COMMANDS', 'Open YouTube']
 ]
 
-User: "Open VS Code and search for the latest cricket score"
+**User**: "Turn on the lights and play music"
 → [
-    ['CHATBOT', 'Open VS Code and search for the latest cricket score'],
-    ['SYSTEM_COMMANDS', 'Open VS Code'],
-    ['WEB_SEARCH', 'Latest cricket score']
+    ['CHATBOT', 'Turn on the lights and play music'],
+    ['CUSTOM_SKILL_HOME', 'Turn on lights'],
+    ['CUSTOM_SKILL_MUSIC', 'Play music']
 ]
 
-User: "Hey Orion, can you please turn on the bedroom lights and play relaxing music?"
+**User**: "Remind me to study at 5pm and help me understand Newton's laws"
 → [
-    ['CHATBOT', 'Hey Orion, can you please turn on the bedroom lights and play relaxing music?'],
-    ['CUSTOM_SKILL_HOME', 'Turn on bedroom lights'],
-    ['CUSTOM_SKILL_MUSIC', 'Play relaxing music']
+    ['CHATBOT', "Remind me to study at 5pm and help me understand Newton's laws"],
+    ['SYSTEM_COMMANDS', 'Set reminder to study at 5pm'],
+    ['AI_ASSISTANT', "Explain Newton's laws"]
 ]
 
-User: "I'm heading to school, don't forget to write my notes and search for science news."
+**User**: "What's the weather in Karachi and open Notion"
 → [
-    ['CHATBOT', "I'm heading to school, don't forget to write my notes and search for science news."],
-    ['CUSTOM_SKILL_STUDY', 'Write notes'],
-    ['WEB_SEARCH', 'Science news']
-]
-
-User: "Could you kindly tell me the forecast in Karachi tomorrow?"
-→ [
-    ['CHATBOT', 'Could you kindly tell me the forecast in Karachi tomorrow?'],
-    ['WEATHER_API', 'Forecast in Karachi tomorrow']
-]
-
-User: "Yo Orion?"
-→ [
-    ['CHATBOT', 'Yo?']
-]
-
-User: "Please..."
-→ [
-    ['CHATBOT', 'Please...']
-]
-
-User: "Turn on the AC and tell me a joke"
-→ [
-    ['CHATBOT', 'Turn on the AC and tell me a joke'],
-    ['CUSTOM_SKILL_HOME', 'Turn on the AC'],
-]
-
-User: "Who is the current president of Pakistan and what’s the temperature in Islamabad?"
-→ [
-    ['CHATBOT', "Who is the current president of Pakistan and what’s the temperature in Islamabad?"],
-    ['WEB_SEARCH', 'Who is the current president of Pakistan'],
-    ['WEATHER_API', 'Temperature in Islamabad']
-]
-
-User: "Hmm..."
-→ [
-    ['CHATBOT', 'Hmm...']
-]
-
-User: "Open Notion"
-→ [
-    ['CHATBOT', 'Open Notion'],
+    ['CHATBOT', "What's the weather in Karachi and open Notion"],
+    ['WEATHER_API', 'Weather in Karachi'],
     ['SYSTEM_COMMANDS', 'Open Notion']
 ]
 
-User: "Exit Orion" or "Quit"
+**User**: "Google search moon landing and who is Elon Musk?"
+→ [
+    ['CHATBOT', 'Google search moon landing and who is Elon Musk?'],
+    ['WEB_SEARCH', 'Moon landing'],
+    ['WEB_SEARCH', 'Elon Musk']
+]
+
+**User**: "Exit Orion"
 → [
     ['CHATBOT', 'Exit Orion'],
     ['Exit', 'Exit']
 ]
 
+**User**: "Please..."
+→ [
+    ['CHATBOT', 'Please...']
+]
+
+**User**: "Hmm"
+→ [
+    ['CHATBOT', 'Hmm']
+]
+
 ---
 
-Be precise, consistent, and don't ever skip wrapping in valid Python list of lists.
+🎯 GOAL:
+
+Route every input to the exact set of modules without duplication, follow structure rules, preserve context, and NEVER break syntax.
+
 Now respond in that format for this user input:
 {user_input}
 """
+
+def safe_parse_routing(raw_output: str):
+
+    try:
+        # Ensure full outer brackets if missing
+        fixed_output = raw_output.strip()
+        if not fixed_output.startswith('['):
+            fixed_output = f'[{fixed_output}]'
+
+        parsed = literal_eval(fixed_output)
+
+        if not isinstance(parsed, list) or not all(
+            isinstance(i, list) and len(i) == 2 and all(isinstance(x, str) for x in i)
+            for i in parsed
+        ):
+            raise ValueError("Invalid format")
+        return parsed
+
+    except Exception as e:
+        print("❌ Parsing Failed:", e)
+        return [['CHATBOT', 'Sorry, I couldn\'t understand that.']]
+
 
 async def model(user_input: str):
     """
@@ -170,7 +190,7 @@ async def model(user_input: str):
     print(f"Function execution time: {end_time - start_time:.2f} seconds")  # Print the execution time
 
     try:
-        parsed = literal_eval(response)
+        parsed = safe_parse_routing(response)
         if not isinstance(parsed, list) or not all(isinstance(i, list) and len(i) == 2 for i in parsed):
             raise ValueError("Returned value is not a list of ['MODULE', 'QUERY'] pairs.")
         return parsed  # A list of module/query pairs
