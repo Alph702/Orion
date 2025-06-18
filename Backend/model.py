@@ -64,7 +64,6 @@ EXAMPLES:
 User: "Please tell me the capital of France."
 → [
     ['CHATBOT', 'Please tell me the capital of France.'],
-    ['CHATBOT', 'What is the capital of France?']
 ]
 
 User: "Open VS Code and search for the latest cricket score"
@@ -108,7 +107,6 @@ User: "Turn on the AC and tell me a joke"
 → [
     ['CHATBOT', 'Turn on the AC and tell me a joke'],
     ['CUSTOM_SKILL_HOME', 'Turn on the AC'],
-    ['CHATBOT', 'Tell me a joke']
 ]
 
 User: "Who is the current president of Pakistan and what’s the temperature in Islamabad?"
@@ -125,11 +123,13 @@ User: "Hmm..."
 
 User: "Open Notion"
 → [
+    ['CHATBOT', 'Open Notion'],
     ['SYSTEM_COMMANDS', 'Open Notion']
 ]
 
 User: "Exit Orion" or "Quit"
 → [
+    ['CHATBOT', 'Exit Orion'],
     ['Exit', 'Exit']
 ]
 
