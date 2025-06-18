@@ -43,6 +43,7 @@ Do NOT:
 ❌ Use double quotes
 ❌ Add any explanation, commentary, or metadata
 ❌ Break into multiple lines or use backticks, code blocks, or fancy quotes
+If you have give complete quaire to CHATBOT, do not give it another time, just give the cleaned query to the other modules
 
 ---
 
