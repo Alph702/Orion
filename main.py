@@ -6,7 +6,7 @@ from Backend.model import model
 class OrionCore:
     def __init__(self):
         self.recognizer = FastNaturalSpeechRecognition()
-        self.tts = OrionTTS(engine="edge")  # Change to "gtts" or "edge" if needed
+        self.tts = OrionTTS(engine="pyttsx3")  # Change to "gtts" or "edge" if needed
         self.exit_requested = False
 
     async def process_input(self, user_input):
