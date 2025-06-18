@@ -128,13 +128,17 @@ User: "Open Notion"
     ['SYSTEM_COMMANDS', 'Open Notion']
 ]
 
+User: "Exit Orion" or "Quit"
+→ [
+    ['Exit', 'Exit']
+]
+
 ---
 
 Be precise, consistent, and don't ever skip wrapping in valid Python list of lists.
 Now respond in that format for this user input:
 {user_input}
 """
-
 
 async def model(user_input: str):
     """
