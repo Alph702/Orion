@@ -1,55 +1,57 @@
 import asyncio
 from Backend.STT import FastNaturalSpeechRecognition
 from Backend.TTS import OrionTTS
-from Backend.model import model
+from Brain.model import model
+from Brain.ChatBot import Chatbot  # Handles queries, speech & logging
 
 class OrionCore:
     def __init__(self):
         self.recognizer = FastNaturalSpeechRecognition()
-        self.tts = OrionTTS(engine="pyttsx3")  # Change to "gtts" or "edge" if needed
+        self.tts = OrionTTS(engine="pyttsx3")  # You can switch to 'gtts' or 'edge'
         self.exit_requested = False
 
     async def process_input(self, user_input):
         try:
+            # Run the intent routing model
             responses = await model(user_input)
 
-            chatbot_responses = []
-            for response_type, content in responses:
-                if response_type == "CHATBOT":
-                    chatbot_responses.append(content)
-                elif response_type == "Exit":
+            for Model, query in responses:
+                if Model == "CHATBOT":
+                    await Chatbot(query=query).process_query()  # Already processes and speaks
+                elif Model == "Exit":
                     print("🛑 Exit signal from model.")
                     self.exit_requested = True
-                elif response_type == "EXEC":
-                    print(f"⚙️ Execute command: {content}")
+                elif Model == "EXEC":
+                    print(f"⚙️ Execute command: {query}")
+                    # Optional: implement executor here
                 else:
-                    print(f"🔎 Unknown response type: {response_type} -> {content}")
-
-            if chatbot_responses:
-                response_text = " ".join(chatbot_responses)
-                print(f"🤖 Orion: {response_text}")
-                await self.tts.speak(response_text)
+                    print(f"🔎 Unknown intent: {Model} -> {query}")
 
         except Exception as e:
             print(f"❌ Error while processing input: {e}")
 
     async def run(self):
-        while True:
-            user_input = await self.recognizer.recognize_from_microphone()
-            print(f"🗣️ User: {user_input}")
+        while not self.exit_requested:
+            try:
+                user_input = await self.recognizer.recognize_from_microphone()
+                print(f"🗣️ You said: {user_input}")
 
-            # Exit only after finishing everything
-            if user_input.strip().lower() in ["exit", "quit"]:
-                print("👋 Exit requested by user.")
-                self.exit_requested = True
+                if user_input.strip().lower() in ["exit", "quit", "stop"]:
+                    print("👋 Exit requested by voice.")
+                    self.exit_requested = True
+                    continue
 
-            await self.process_input(user_input)
+                await self.process_input(user_input)
+                await asyncio.sleep(0.5)  # slight pause to stabilize loop
 
-            if self.exit_requested:
-                print("✅ Finished last task. Exiting gracefully.")
-                break
+            except Exception as e:
+                print(f"❌ STT Error: {e}")
+                await self.tts.speak("Sorry, I couldn't understand that.")
+                await asyncio.sleep(1)
 
-# Entry point
+        print("✅ Orion shutting down gracefully.")
+
+# 🎯 Entry point
 async def main():
     core = OrionCore()
     await core.run()

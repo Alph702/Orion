@@ -3,6 +3,9 @@ import sounddevice as sd
 import soundfile as sf
 import io
 import asyncio
+from edge_tts import Communicate
+from gtts import gTTS
+import pyttsx3
 
 class OrionTTS:
     def __init__(self, engine="edge"):  # Options: gtts, edge, pyttsx3
@@ -21,7 +24,7 @@ class OrionTTS:
         
 
     async def _speak_edge_tts(self, text):
-        from edge_tts import Communicate
+        
         start_time = time.time()
         communicate = Communicate(text=text, voice="en-GB-RyanNeural")  # Avoid "format" param
         audio_stream = io.BytesIO()
@@ -45,7 +48,6 @@ class OrionTTS:
 
     async def _speak_gtts(self, text):
         start_time = time.time()
-        from gtts import gTTS
         tts = gTTS(text)
         stream = io.BytesIO()
         tts.write_to_fp(stream)
@@ -57,7 +59,6 @@ class OrionTTS:
         sd.wait()
 
     def _speak_offline(self, text):
-        import pyttsx3
         engine = pyttsx3.init()
         engine.say(text)
         engine.runAndWait()
