@@ -1,4 +1,4 @@
-# ORION — Omnipotent Routing Intelligence for Operational Navigation (Preview)
+# ORION — Omnipresent Responsive Intelligent Operations Network (Preview)
 
 > ⚠️ This is the **first functional module** of ORION — a broader intelligent assistant system. What you're reading is documentation for just **one puzzle piece** in development, not the complete ORION project.
 
@@ -6,7 +6,7 @@
 
 ## 🌟 Welcome to ORION
 
-**ORION (Omnipotent Routing Intelligence for Operational Navigation)** is a modular, intelligent assistant framework designed to understand user intent and route commands to specialized modules — such as AI reasoning, weather APIs, music control, or system automation.
+**ORION (Omnipresent Responsive Intelligent Operations Network)** is a modular, intelligent assistant framework designed to understand user intent and route commands to specialized modules — such as AI reasoning, weather APIs, music control, or system automation.
 
 This document introduces the **first stage** of the system — the **Routing Module**, which translates raw human input into structured module commands.
 

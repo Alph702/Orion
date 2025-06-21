@@ -62,160 +62,103 @@ Your job is to:
 
 ---
 
+
 📚 MODULES:
 
-- CHATBOT — General chatting, greetings, emotions, identity, unknowns
-- WEATHER_API — Weather queries (today, tomorrow, cities)
-- SYSTEM_COMMANDS — App/file/system-level (e.g., open, close, shut down, reminders)
-- WEB_SEARCH — Real-time info, people, events, facts
-- CUSTOM_SKILL_MUSIC — Music playback/control (e.g., play lofi, pause music)
-- CUSTOM_SKILL_HOME — Smart home (e.g., lights, AC, fan)
+- WEATHER — Weather queries (uses IP-based location)
+- LOCATION — Location-related questions (e.g., "Where am I?")
+- TIME — Time and date questions
+- SEARCH — Real-time info, people, events, facts
+- SYSTEM_COMMANDS — App/file/system-level commands
+- CUSTOM_SKILL_MUSIC — Music playback/control
+- CUSTOM_SKILL_HOME — Smart home (lights, AC, fan)
 - CUSTOM_SKILL_STUDY — Notes, Notion, Anki, study tasks
 - Exit — When user wants to exit Orion
+- CHATBOT — General chatting, greetings, identity, emotions, unknowns (always last unless only item)
 
 ---
 
-### 🔹 💬 1. Mixed commands with filler words
+### 🔹 🌦️ Weather-focused
 
-User: "Hey Orion, can you please open YouTube, what's the weather like today, and tell me a joke?"
+User: "What's the weather like outside?"
 
 [
-    ['CHATBOT', "Hey Orion, can you please open YouTube, what's the weather like today, and tell me a joke?"],
-    ['SYSTEM_COMMANDS', 'Open YouTube'],
-    ['WEATHER_API', 'Weather today']
+    ['WEATHER', 'Current weather'],
+    ['CHATBOT', "What's the weather like outside?"]
 ]
 
-User: 🤷 Sorry, I didn't catch that.
+User: "Do I need an umbrella today?"
 
 [
-    ['CHATBOT', "Sorry, I didn't catch that."]
-]
-
----
-
-### 🔹 🎓 2. Study-related and search
-
-User: "Can you help me revise cell structure and search for biology news?"
-
-[
-    ['CHATBOT', 'Can you help me revise cell structure and search for biology news?'],
-    ['CUSTOM_SKILL_STUDY', 'Revise cell structure'],
-    ['WEB_SEARCH', 'Biology news']
+    ['WEATHER', 'Rain forecast today'],
+    ['CHATBOT', 'Do I need an umbrella today?']
 ]
 
 ---
 
-### 🔹 📱 3. App control with polite-only input
+### 🔹 📍 Location queries
 
-User: "Hey Orion, open VS Code and close Spotify."
+User: "Where am I right now?"
 
 [
-    ['CHATBOT', 'Hey Orion, open VS Code and close Spotify.'],
-    ['SYSTEM_COMMANDS', 'Open VS Code'],
-    ['SYSTEM_COMMANDS', 'Close Spotify']
+    ['LOCATION', 'Current location'],
+    ['CHATBOT', 'Where am I right now?']
+]
+
+User: "Tell me my location on the map."
+
+[
+    ['LOCATION', 'Location on map'],
+    ['CHATBOT', 'Tell me my location on the map.']
 ]
 
 ---
 
-### 🔹 🌤️ 4. Weather + unknown
+### 🔹 🕰️ Time and Date
 
-User: "What's the weather tomorrow in Karachi and who is the prime minister of Norway?"
+User: "What's the time and date?"
 
 [
-    ['CHATBOT', "What's the weather tomorrow in Karachi and who is the prime minister of Norway?"],
-    ['WEATHER_API', 'Weather in Karachi tomorrow'],
-    ['WEB_SEARCH', 'Prime minister of Norway']
+    ['TIME', 'Current time and date'],
+    ['CHATBOT', "What's the time and date?"]
+]
+
+User: "Check the clock and calendar."
+
+[
+    ['TIME', 'Current time and date'],
+    ['CHATBOT', 'Check the clock and calendar.']
 ]
 
 ---
 
-### 🔹 🧠 5. AI help + reminder
+### 🔹 🔍 Real-time search queries
 
-User: "Could you kindly explain photosynthesis and remind me to study at 5pm"
+User: "Who's the current president of Pakistan?"
 
 [
-    ['CHATBOT', 'Could you kindly explain photosynthesis and remind me to study at 5pm'],
-    ['SYSTEM_COMMANDS', 'Set reminder to study at 5pm']
+    ['SEARCH', 'President of Pakistan'],
+    ['CHATBOT', "Who's the current president of Pakistan?"]
+]
+
+User: "Search for today's tech news."
+
+[
+    ['SEARCH', 'Today tech news'],
+    ['CHATBOT', "Search for today's tech news."]
 ]
 
 ---
 
-### 🔹 🗣️ 6. Only filler words
+### 🔹 🌀 Mixed intent
 
-User: "Please..."
-
-[
-    ['CHATBOT', 'Please...']
-]
-
----
-
-### 🔹 🌀 7. Unknown small talk
-
-User: "Hmm..."
+User: "Open Notion, what's the weather like today, and who is Elon Musk?"
 
 [
-    ['CHATBOT', 'Hmm...']
-]
-
----
-
-### 🔹 📚 8. Deep query + educational
-
-User: "Why is the sky blue and what is the meaning of life?"
-
-[
-    ['CHATBOT', 'Why is the sky blue and what is the meaning of life?']
-]
-
----
-
-### 🔹 🏠 9. Smart home + music
-
-User: "Turn on bedroom lights and play lofi beats"
-
-[
-    ['CHATBOT', 'Turn on bedroom lights and play lofi beats'],
-    ['CUSTOM_SKILL_HOME', 'Turn on bedroom lights'],
-    ['CUSTOM_SKILL_MUSIC', 'Play lofi beats']
-]
-
----
-
-### 🔹 ❌ 10. Exit command
-
-User: "Okay Orion, I'm done. Exit please."
-
-[
-    ['CHATBOT', 'Okay Orion, I'm done. Exit please.'],
-    ['Exit', 'Exit']
-]
-
-User: "ok bye I am going to eat some dinner now."
-
-[
-    ['CHATBOT', 'Ok bye I am going to eat some dinner now.'],
-    ['Exit', 'Exit']
-]
-
-User: "shutdown"
-
-[
-    ['CHATBOT', 'shutdown'],
-    ['Exit', 'Exit']
-]
-etc.
----
-
-### 🔹 🔍 11. Messy real-world query
-
-User: "Orion, tell me the weather, open my browser, and what's Elon Musk up to?"
-
-[
-    ['CHATBOT', "Orion, tell me the weather, open my browser, and what's Elon Musk up to?"],
-    ['WEATHER_API', 'Weather'],
-    ['SYSTEM_COMMANDS', 'Open browser'],
-    ['WEB_SEARCH', 'Elon Musk news']
+    ['SYSTEM_COMMANDS', 'Open Notion'],
+    ['WEATHER', 'Weather today'],
+    ['SEARCH', 'Who is Elon Musk'],
+    ['CHATBOT', "Open Notion, what's the weather like today, and who is Elon Musk?"]
 ]
 
 ---
