@@ -30,13 +30,7 @@ class Chatbot:
 
         # 4) Handle the query
         self.query = query
-        if not self.query:
-            response = "Sorry... I didn't catch anything. Can you repeat that?"
-            print(f"🤖 Orion: {response}")
-            asyncio.run(self.tts.speak(response))
-            # Log just this interaction
-            self._log_to_json("user", "", "assistant", response)
-            return
+
 
         print(f"🗣️ User: {self.query}")
 
@@ -75,7 +69,7 @@ class Chatbot:
 
             # Ask the model
             resp = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama3-70b-8192",
                 messages=messages,
                 temperature=0.84,
                 top_p=1,

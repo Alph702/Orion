@@ -11,7 +11,7 @@ class RealTimeInformation:
 
     async def get(self, module, query):
         self.location_data = await self.get_location()
-        module = module.lower()
+        module = module.upper()
         if module == "WEATHER":
             return await self.get_detailed_weather()
         elif module == "TIME":

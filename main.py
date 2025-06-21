@@ -4,6 +4,9 @@ from Backend.TTS import OrionTTS
 from Brain.model import model
 from Brain.ChatBot import Chatbot  # Handles queries, speech & logging
 from Backend.RealtimeData import RealTimeInformation
+import nest_asyncio
+nest_asyncio.apply()
+
 
 class OrionCore:
     def __init__(self):
@@ -17,14 +20,14 @@ class OrionCore:
             responses = await model(user_input)
             print(f"🔄 Model responses: {responses}")
             web_responses = ""
-            Query = f"This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n{web_responses}\n\n --- \n\n This is users query: {'{query}'}\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+            Query = f""
 
             for Model, query in responses:
-                if Model == "CHATBOT":
-                    await Chatbot(query= Query.replace("{query}", query)).process_query()
-                elif Model.upper() in ["WEATHER", "TIME", "LOCATION", "SEARCH"]:
-                    web_responses = await RealTimeInformation().get(Model.upper(), query)
-                    print(web_responses)
+                if Model.upper() in ["WEATHER", "TIME", "LOCATION", "SEARCH"]:
+                    web_responses += await RealTimeInformation().get(module=Model.upper(), query=query)
+                elif Model == "CHATBOT":
+                    Query = f"This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n{web_responses}\n\n --- \n\n This is users query: {query}\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+                    await Chatbot(query=Query).process_query()
                 elif Model == "Exit":
                     print("🛑 Exit signal from model.")
                     self.exit_requested = True
@@ -61,4 +64,12 @@ async def main():
     await core.run()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+
+    # Create and run the main Orion task
+    main_task = loop.create_task(main())
+
+    try:
+        loop.run_until_complete(main_task)
+    except KeyboardInterrupt:
+        print("👋 Orion terminated by keyboard interrupt.")
