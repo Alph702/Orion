@@ -6,6 +6,7 @@ from googlesearch import search
 import re
 from dotenv import load_dotenv
 import os
+from Brain.ChatBot import Chatbot
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
@@ -14,20 +15,6 @@ class RealTimeInformation:
     def __init__(self):
         self.location_data = None
         self.api_key = os.getenv('ipapiKey')
-
-    async def get(self, module, query):
-        self.location_data = await self.get_location()
-        module = module.upper()
-        if module == "WEATHER":
-            return await self.get_detailed_weather()
-        elif module == "TIME":
-            return self.get_time_info()
-        elif module == "LOCATION":
-            return self.get_location_info()
-        elif module == "SEARCH":
-            return await self.perform_search(query)
-        else:
-            return f"❌ Unknown module: {module}"
         
     async def get_location(self):
         async with aiohttp.ClientSession() as session:
@@ -58,7 +45,11 @@ class RealTimeInformation:
                     "latitute": "", "longitude": "", "timezone": "", "error": str(e)
                 }
 
-    async def get_detailed_weather(self):
+    async def get_detailed_weather(self, query):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
         lat = self.location_data["latitute"]
         lon = self.location_data["longitude"]
         if not lat or not lon:
@@ -79,27 +70,46 @@ class RealTimeInformation:
         temp_c = current.get("temperature", 0)
         condition = current.get("weathercode", 0)
 
-        return (
-            f"📍 Location: {self.location_data['city']}\n"
-            f"🌤️ Condition: {self.interpret_weather_code(condition)}\n"
-            f"🌡️ Temperature: {temp_c}°C\n"
-            f"🌬️ Wind: {wind_speed} km/h from {self.degrees_to_compass(wind_dir)}"
+        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+                ---
+                📍 Location: {self.location_data['city']}
+                🌤️ Condition: {self.interpret_weather_code(condition)}
+                🌡️ Temperature: {temp_c}°C
+                🌬️ Wind: {wind_speed} km/h from {self.degrees_to_compass(wind_dir)}
+                --- 
+                This is users query: {query}
+                ---
+                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
         )
 
-    def get_time_info(self):
+    def get_time_info(self, query):
         now = datetime.now()
-        return (
-            f"🗕️ Date: {now.strftime('%A, %d %B %Y')}\n"
-            f"🕰️ Time: {now.strftime('%I:%M %p')}\n"
-            f"🌍 Timezone: {self.location_data['timezone']}"
+        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+---
+🗕️ Date: {now.strftime('%A, %d %B %Y')}
+🕰️ Time: {now.strftime('%I:%M %p')}
+🌍 Timezone: {self.location_data['timezone']}
+--- 
+This is users query: {query}
+---
+Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
         )
 
-    def get_location_info(self):
-        return (
-            f"📍 City: {self.location_data['city']}\n"
-            f"🗺️ Region: {self.location_data['region']}\n"
-            f"🌐 Country: {self.location_data['country']}\n"
-            f"📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}"
+    async def get_location_info(self, query):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
+        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+                --- 
+                📍 City: {self.location_data['city']}
+                🗺️ Region: {self.location_data['region']}
+                🌐 Country: {self.location_data['country']}
+                📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}
+                --- 
+                This is users query: {query}
+                --- 
+                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
         )
 
     async def perform_search(self, query, max_results=3):
@@ -130,7 +140,14 @@ class RealTimeInformation:
                 except Exception:
                     pass
 
-            return "\n\n".join(results) if results else "❌ No useful results found."
+            Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+                ---
+                {results}
+                --- 
+                This is users query: {query}
+                --- 
+                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
+            )
         except Exception as e:
             return f"❌ Error during search: {str(e)}"
 
@@ -165,7 +182,6 @@ class RealTimeInformation:
         ix = int((degree + 22.5) / 45.0) % 8
         return dirs[ix]
 
-RealTimeInformation = RealTimeInformation()
-# Example usage:
-location = asyncio.run(RealTimeInformation.get("weather", ""))
-print(location)
+# RealTimeInformation = RealTimeInformation()
+# # Example usage:
+# asyncio.run(RealTimeInformation.get_location_info("Where am I?"))

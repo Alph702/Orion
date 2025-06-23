@@ -1810,5 +1810,109 @@
     {
         "role": "assistant",
         "content": "Goodbye!"
+    },
+    {
+        "role": "user",
+        "content": "Who am I. Who is your boss and what is photosynthesis?"
+    },
+    {
+        "role": "assistant",
+        "content": "You are my user.\n\nMy boss and creator is Amanat Ali.\n\nPhotosynthesis is how plants make food using sunlight."
+    },
+    {
+        "role": "user",
+        "content": "Who am I. Who is your boss and what is photosynthesis?"
+    },
+    {
+        "role": "assistant",
+        "content": "You are my user.\n\nMy boss and creator is Amanat Ali.\n\nPhotosynthesis is how plants make food using sunlight."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                ---\n                📍 City: Mirpur Khas\n                🗺️ Region: Sindh\n                🌐 Country: Pakistan\n                📌 Coordinates: 25.5276, 69.01255\n                --- \n                This is users query: Where am I?\n                ---\n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "You are in Mirpur Khas, Sindh, Pakistan, with coordinates 25.5276, 69.01255."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                --- \n                📍 City: Mirpur Khas\n                🗺️ Region: Sindh\n                🌐 Country: Pakistan\n                📌 Coordinates: 25.5276, 69.01255\n                --- \n                This is users query: Where am I?\n                --- \n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "You're currently in Mirpur Khas, which is a city in the Sindh region of Pakistan."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                ---\n                📍 Location: Mirpur Khas\n                🌤️ Condition: Overcast\n                🌡️ Temperature: 31.5°C\n                🌬️ Wind: 12.5 km/h from SW\n                --- \n                This is users query: current weather in my location\n                ---\n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The current weather in your location, Mirpur Khas, is overcast with a temperature of 31.5°C, and a wind speed of 12.5 km/h coming from the southwest."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                ---\n                📍 Location: Mirpur Khas\n                🌤️ Condition: Overcast\n                🌡️ Temperature: 31.5°C\n                🌬️ Wind: 12.5 km/h from SW\n                --- \n                This is users query: Karachi weather\n                ---\n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I don't know the current weather in Karachi as the information provided is for Mirpur Khas. Let me check online for the latest weather in Karachi."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n🗕️ Date: Monday, 23 June 2025\n🕰️ Time: 09:52 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: Karachi time\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The current time in Karachi is 09:52 PM on Monday, 23 June 2025."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                ---\n                📍 Location: Mirpur Khas\n                🌤️ Condition: Overcast\n                🌡️ Temperature: 31.5°C\n                🌬️ Wind: 12.5 km/h from SW\n                --- \n                This is users query: Karachi weather today\n                ---\n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I don't know the current weather in Karachi as the information provided is for Mirpur Khas. Let me check online for the latest weather in Karachi."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n🗕️ Date: Monday, 23 June 2025\n🕰️ Time: 09:53 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: Karachi time now\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The current time in Karachi is 09:53 PM."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n                ---\n                📍 Location: Mirpur Khas\n                🌤️ Condition: Overcast\n                🌡️ Temperature: 31.5°C\n                🌬️ Wind: 12.5 km/h from SW\n                --- \n                This is users query: Karachi weather today\n                ---\n                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I don't know the current weather in Karachi as the information provided is for Mirpur Khas. If you'd like, I can try to check online for the latest weather in Karachi."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n🗕️ Date: Monday, 23 June 2025\n🕰️ Time: 09:54 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: Karachi time now\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The current time in Karachi is 09:54 PM."
+    },
+    {
+        "role": "user",
+        "content": "Orion Iran and Israel conflict Trump issues"
+    },
+    {
+        "role": "assistant",
+        "content": "It seems like you're asking about the Iran-Israel conflict and its relation to Trump. As of my knowledge cutoff, the conflict between Iran and Israel has been ongoing for several years, with tensions escalating during Donald Trump's presidency. Trump's administration took a hardline stance against Iran, withdrawing from the Joint Comprehensive Plan of Action (JCPOA) and imposing sanctions on Iran.\n\nThe conflict has involved proxy wars in Syria and Yemen, as well as direct military confrontations. Israel has been concerned about Iran's nuclear program and its presence in Syria, while Iran has accused Israel of supporting anti-Iranian militant groups.\n\nTrump's involvement in the conflict has been marked by his \"maximum pressure\" campaign against Iran, which has led to increased tensions in the region. However, I would need to check online for the most recent updates on this topic. Would you like me to do that?"
+    },
+    {
+        "role": "user",
+        "content": "Orion Iran and Israel conflict Trump issues"
+    },
+    {
+        "role": "assistant",
+        "content": "Let me check online for the latest updates on the Iran-Israel conflict and its relation to Trump..."
     }
 ]

@@ -10,7 +10,7 @@ from Backend import TTS
 load_dotenv(dotenv_path='../.env')
 
 class Chatbot:
-    def __init__(self, query=None):
+    def __init__(self):
         # 1) Load Groq API key
         self.groq_api = os.getenv('GroqAPI')
         if not self.groq_api:
@@ -28,11 +28,9 @@ class Chatbot:
             with open(self.db_file, 'w', encoding='utf-8') as f:
                 json.dump([], f, ensure_ascii=False, indent=4)
 
-        # 4) Handle the query
-        self.query = query
-
-
-        print(f"🗣️ User: {self.query}")
+    def handle_query(self, query):
+        print(f"🗣️ User: {query}")
+        asyncio.create_task(self.process_query(query))
 
     @staticmethod
     def load_chat_history_trimmed(filepath, user_query, max_history=6):
@@ -56,7 +54,7 @@ class Chatbot:
         # 🔹 Combine: system prompt + trimmed history + new query
         return system_prompt + trimmed
 
-    async def process_query(self):
+    async def process_query(self, query):
         try:
             start = time.time()
 
@@ -65,7 +63,7 @@ class Chatbot:
                 history = json.load(f)
 
             # Build messages: history + current user message
-            messages = self.load_chat_history_trimmed(self.db_file, self.query)
+            messages = self.load_chat_history_trimmed(self.db_file, query)
 
             # Ask the model
             resp = self.client.chat.completions.create(
@@ -83,14 +81,14 @@ class Chatbot:
             await self.tts.speak(reply)
 
             # Append both user + assistant in one shot
-            self._log_to_json("user", self.query, "assistant", reply)
+            self._log_to_json("user", query, "assistant", reply)
 
         except Exception as e:
             err = f"❌ Error while processing query: {e}"
             print(err)
             await self.tts.speak("Oops, something went wrong.")
             # Log the error as assistant response
-            self._log_to_json("user", self.query, "assistant", err)
+            self._log_to_json("user", query, "assistant", err)
 
     def _log_to_json(self, role, content, assistant_role=None, assistant_content=None):
         try:
@@ -121,4 +119,5 @@ class Chatbot:
 
 # # 🔧 Example usage:
 # if __name__ == "__main__":
-#     Chatbot(query="Who am I. Who is your boss and what is photosynthesis?")
+#     bot = Chatbot()
+#     bot.handle_query("Who am I. Who is your boss and what is photosynthesis?")
