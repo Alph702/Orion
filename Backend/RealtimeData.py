@@ -4,10 +4,16 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from googlesearch import search
 import re
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv(dotenv_path='../.env')
 
 class RealTimeInformation:
     def __init__(self):
         self.location_data = None
+        self.api_key = os.getenv('ipapiKey')
 
     async def get(self, module, query):
         self.location_data = await self.get_location()
@@ -27,26 +33,30 @@ class RealTimeInformation:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get("https://ipinfo.io/json") as response:
+                    ip_info = await response.json()
+                    ip = ip_info.get("ip", "Unknown")
+                
+                async with session.get(f"https://api.ipapi.is?q={ip}&key={self.api_key}") as response:
                     data = await response.json()
-                    city = data.get("city", "Unknown")
-                    region = data.get("region", "")
-                    country = data.get("country", "")
-                    loc = data.get("loc", "")
-                    lat, lon = loc.split(",")
+                    location = data.get("location", {})
+                    city = location.get("city", "Unknown")
+                    region = location.get("state", "")
+                    country = location.get("country", "")
+                    lat = location.get("latitude", "")
+                    lon = location.get("longitude", "")
                     return {
                         "city": city,
                         "region": region,
                         "country": country,
                         "latitute": lat,
                         "longitude": lon,
-                        "timezone": data.get("timezone")
+                        "timezone": location.get("timezone", "Unknown")
                     }
             except Exception as e:
                 return {
                     "city": "Unknown", "region": "", "country": "",
                     "latitute": "", "longitude": "", "timezone": "", "error": str(e)
                 }
-
 
     async def get_detailed_weather(self):
         lat = self.location_data["latitute"]
@@ -93,33 +103,36 @@ class RealTimeInformation:
         )
 
     async def perform_search(self, query, max_results=3):
-        searcher = search(query, num_results=max_results, lang="en")
-        links = list(searcher)
-
-        valid_links = [
-            link for link in links if all(bad not in link for bad in [
-                "gstatic", "google.com/search", "accounts.google.com", ".jpg", ".png", ".webp"
-            ])
-        ][:max_results]
-
-        results = []
-        for link in valid_links:
-            summary = await self.scrape_summary(link)
-            results.append(f"🔗 {link}\n📜 {summary or 'Summary not available'}")
-
-        # Integrated Wikipedia inside search system
-        title = re.sub(r"[^\w\s]", "", query).strip().replace(" ", "_").title()
-        wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(wiki_url) as response:
-                    data = await response.json()
-                    if 'extract' in data:
-                        results.append(f"📘 Wikipedia Summary:\n{data['extract']}")
-        except:
-            pass
+            searcher = search(query, num_results=max_results, lang="en")
+            links = list(searcher)
 
-        return "\n\n".join(results) if results else "❌ No useful results found."
+            valid_links = [
+                link for link in links if all(bad not in link for bad in [
+                    "gstatic", "google.com/search", "accounts.google.com", ".jpg", ".png", ".webp"
+                ])
+            ][:max_results]
+
+            results = []
+            for link in valid_links:
+                summary = await self.scrape_summary(link)
+                results.append(f"🔗 {link}\n📜 {summary or 'Summary not available'}")
+
+            # Integrated Wikipedia inside search system
+            title = re.sub(r"[^\w\s]", "", query).strip().replace(" ", "_").title()
+            wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
+            async with aiohttp.ClientSession() as session:
+                try:
+                    async with session.get(wiki_url) as response:
+                        data = await response.json()
+                        if 'extract' in data:
+                            results.append(f"📘 Wikipedia Summary:\n{data['extract']}")
+                except Exception:
+                    pass
+
+            return "\n\n".join(results) if results else "❌ No useful results found."
+        except Exception as e:
+            return f"❌ Error during search: {str(e)}"
 
     async def scrape_summary(self, url):
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -151,3 +164,8 @@ class RealTimeInformation:
         dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
         ix = int((degree + 22.5) / 45.0) % 8
         return dirs[ix]
+
+RealTimeInformation = RealTimeInformation()
+# Example usage:
+location = asyncio.run(RealTimeInformation.get("weather", ""))
+print(location)

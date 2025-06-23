@@ -1770,5 +1770,45 @@
     {
         "role": "assistant",
         "content": "I'm not capable of shutting down independently, but I can inform my creator, Amanat Ali, to do so if needed. However, I'll remain active and ready to assist you unless instructed otherwise."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n\n\n --- \n\n This is users query: ji bilkul ready Bhi Nahin Hai\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "It seems like you're speaking in Hindi! I'm not entirely sure what you meant, but it sounds like you're saying something is not ready. Could you please repeat that in English or provide more context so I can better understand and assist you?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n🗕️ Date: Saturday, 21 June 2025\n🕰️ Time: 05:16 PM\n🌍 Timezone: Asia/Karachi\n\n --- \n\n This is users query: what's the current time\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "According to my information, the current time is 05:16 PM on Saturday, 21 June 2025, in the Asia/Karachi timezone."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n\n\n --- \n\n This is users query: Sorry, I didn't catch that.\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you repeat that, please?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n\n\n --- \n\n This is users query: Sorry, I didn't catch that.\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "Could you say that again?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n\n\n --- \n\n This is users query: just exit\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "Goodbye!"
     }
 ]
