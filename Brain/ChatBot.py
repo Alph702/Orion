@@ -18,7 +18,7 @@ class Chatbot:
 
         # 2) Initialize client & TTS
         self.client = Groq(api_key=self.groq_api)
-        self.tts    = TTS.OrionTTS(engine="pyttsx3")
+        self.tts    = TTS.OrionTTS(engine="pyttsx3")  # You can switch to 'gtts' or 'edge'
 
         # 3) Path to your existing JSON (with manual system prompt already inside)
         self.db_file = os.path.join('Brain', 'Data', 'ChatHistory.json')
@@ -30,15 +30,31 @@ class Chatbot:
 
         # 4) Handle the query
         self.query = query
-        if not self.query:
-            response = "Sorry... I didn't catch anything. Can you repeat that?"
-            print(f"🤖 Orion: {response}")
-            asyncio.run(self.tts.speak(response))
-            # Log just this interaction
-            self._log_to_json("user", "", "assistant", response)
-            return
+
 
         print(f"🗣️ User: {self.query}")
+
+    @staticmethod
+    def load_chat_history_trimmed(filepath, user_query, max_history=6):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            history = json.load(f)
+        
+        with open(os.path.join('Brain', 'Data', 'orionconfig.json'), 'r', encoding='utf-8') as f:
+            config = json.load(f)
+
+        # 🔹 Separate the system prompt from the rest
+        system_prompt = [msg for msg in history if msg["role"] == "system"]
+        system_prompt[0]['content'].replace("{user}", config['user'])
+        conversation = [msg for msg in history if msg["role"] != "system"]
+
+        # 🔹 Trim conversation to the last N entries (user + assistant messages)
+        trimmed = conversation[-max_history:]
+
+        # 🔹 Append current user query
+        trimmed.append({"role": "user", "content": user_query})
+
+        # 🔹 Combine: system prompt + trimmed history + new query
+        return system_prompt + trimmed
 
     async def process_query(self):
         try:
@@ -49,11 +65,11 @@ class Chatbot:
                 history = json.load(f)
 
             # Build messages: history + current user message
-            messages = history + [{"role": "user", "content": self.query}]
+            messages = self.load_chat_history_trimmed(self.db_file, self.query)
 
             # Ask the model
             resp = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama3-70b-8192",
                 messages=messages,
                 temperature=0.84,
                 top_p=1,
@@ -77,7 +93,6 @@ class Chatbot:
             self._log_to_json("user", self.query, "assistant", err)
 
     def _log_to_json(self, role, content, assistant_role=None, assistant_content=None):
-        """Append user and assistant messages to the existing JSON file with UTF-8."""
         try:
             with open(self.db_file, 'r+', encoding='utf-8') as f:
                 try:
@@ -85,21 +100,25 @@ class Chatbot:
                 except json.JSONDecodeError:
                     data = []
 
-                # Append user message
-                data.append({"role": role, "content": content})
+                # 🔹 Remove system messages from re-logging
+                if role == "system":
+                    return
 
-                # Append assistant message if provided
-                if assistant_role and assistant_content is not None:
-                    data.append({"role": assistant_role, "content": assistant_content})
+                # 🔹 Append current messages
+                entries = [{"role": role, "content": content}]
+                if assistant_role and assistant_content:
+                    entries.append({"role": assistant_role, "content": assistant_content})
 
-                # Write back
+                # 🔹 Avoid re-adding system messages
+                data += entries
+
                 f.seek(0)
-                json.dump(data, f, ensure_ascii=False, indent=4)
+                json.dump(data, f, indent=4, ensure_ascii=False)
                 f.truncate()
 
-        except Exception as err:
-            print(f"❌ Failed to log chat: {err}")
+        except Exception as e:
+            print(f"❌ Failed to log chat: {e}")
 
 # # 🔧 Example usage:
 # if __name__ == "__main__":
-#     Chatbot(query="Who is your boss and what is photosynthesis?")
+#     Chatbot(query="Who am I. Who is your boss and what is photosynthesis?")
