@@ -5,6 +5,7 @@ import time
 import json
 from groq import Groq
 from Backend import TTS
+from Backend.RealtimeData import RealTimeInformation
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
@@ -19,6 +20,7 @@ class Chatbot:
         # 2) Initialize client & TTS
         self.client = Groq(api_key=self.groq_api)
         self.tts    = TTS.OrionTTS(engine="pyttsx3")  # You can switch to 'gtts' or 'edge'
+        self.realtime_info = RealTimeInformation()
 
         # 3) Path to your existing JSON (with manual system prompt already inside)
         self.db_file = os.path.join('Brain', 'Data', 'ChatHistory.json')
@@ -28,9 +30,34 @@ class Chatbot:
             with open(self.db_file, 'w', encoding='utf-8') as f:
                 json.dump([], f, ensure_ascii=False, indent=4)
 
-    def handle_query(self, query):
+    async def handle_query(self, query, contexts:list = ["General"]):
+        if not query:
+            print("❌ Empty query received. Please provide a valid input.")
+            return
         print(f"🗣️ User: {query}")
-        asyncio.create_task(self.process_query(query))
+        responce = ""
+        for context in contexts:
+            if context.lower() == "weather":
+                responce += "\n" + await self.realtime_info.get_detailed_weather()
+            elif context.lower() == "time":
+                responce += "\n" + await self.realtime_info.get_time_info()
+            elif context.lower() == "location":
+                responce += "\n" + await self.realtime_info.get_location_info()
+            elif context.lower() == "search":
+                responce += "\n" + await self.realtime_info.perform_search(query)
+            elif context.lower() == "gerneral":
+                pass  # General context, no action needed
+
+        if responce:
+            query = f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+---
+{responce}
+--- 
+This is users query: {query}
+---
+Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
+
+        await self.process_query(query)
 
     @staticmethod
     def load_chat_history_trimmed(filepath, user_query, max_history=6):

@@ -6,8 +6,6 @@ from googlesearch import search
 import re
 from dotenv import load_dotenv
 import os
-from Brain.ChatBot import Chatbot
-
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
 
@@ -45,7 +43,7 @@ class RealTimeInformation:
                     "latitute": "", "longitude": "", "timezone": "", "error": str(e)
                 }
 
-    async def get_detailed_weather(self, query):
+    async def get_detailed_weather(self):
         if not self.location_data:
             self.location_data = await self.get_location()
             if "error" in self.location_data:
@@ -70,46 +68,35 @@ class RealTimeInformation:
         temp_c = current.get("temperature", 0)
         condition = current.get("weathercode", 0)
 
-        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
-                ---
-                📍 Location: {self.location_data['city']}
-                🌤️ Condition: {self.interpret_weather_code(condition)}
-                🌡️ Temperature: {temp_c}°C
-                🌬️ Wind: {wind_speed} km/h from {self.degrees_to_compass(wind_dir)}
-                --- 
-                This is users query: {query}
-                ---
-                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
+        return (
+            f"📍 Location: {self.location_data['city']}\n"
+            f"🌤️ Condition: {self.interpret_weather_code(condition)}\n"
+            f"🌡️ Temperature: {temp_c}°C\n"
+            f"🌬️ Wind: {wind_speed} km/h from {self.degrees_to_compass(wind_dir)}"
         )
 
-    def get_time_info(self, query):
-        now = datetime.now()
-        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
----
-🗕️ Date: {now.strftime('%A, %d %B %Y')}
-🕰️ Time: {now.strftime('%I:%M %p')}
-🌍 Timezone: {self.location_data['timezone']}
---- 
-This is users query: {query}
----
-Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
-        )
-
-    async def get_location_info(self, query):
+    async def get_time_info(self):
         if not self.location_data:
             self.location_data = await self.get_location()
             if "error" in self.location_data:
                 return f"❌ Error fetching location: {self.location_data['error']}"
-        Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
-                --- 
-                📍 City: {self.location_data['city']}
-                🗺️ Region: {self.location_data['region']}
-                🌐 Country: {self.location_data['country']}
-                📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}
-                --- 
-                This is users query: {query}
-                --- 
-                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
+        now = datetime.now()
+        return (
+            f"🗕️ Date: {now.strftime('%A, %d %B %Y')}\n"
+            f"🕰️ Time: {now.strftime('%I:%M %p')}\n"
+            f"🌍 Timezone: {self.location_data['timezone']}"
+        )
+
+    async def get_location_info(self):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
+        return (
+            f"📍 City: {self.location_data['city']}\n"
+            f"🗺️ Region: {self.location_data['region']}\n"
+            f"🌐 Country: {self.location_data['country']}\n"
+            f"📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}"
         )
 
     async def perform_search(self, query, max_results=3):
@@ -139,15 +126,7 @@ Now, please respond to the user with the best possible answer based on the infor
                             results.append(f"📘 Wikipedia Summary:\n{data['extract']}")
                 except Exception:
                     pass
-
-            Chatbot(query=f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
-                ---
-                {results}
-                --- 
-                This is users query: {query}
-                --- 
-                Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
-            )
+            return "\n\n".join(results) if results else "❌ No useful results found."
         except Exception as e:
             return f"❌ Error during search: {str(e)}"
 

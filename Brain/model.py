@@ -20,125 +20,125 @@ class OrionModel:
         self.realtime_info = RealTimeInformation()
         self.Chatbot = Chatbot()
 
+        # Tool definitions for Groq function calling
         self.tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "Chatbot",
-                    "description": "Handles general user queries that don't require real-time information. "
-                                   "This function is best suited for conversational queries, FAQs, or general knowledge. "
-                                   "It does not handle queries requiring real-time updates, such as news, weather, or current events.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "User query for the chatbot."}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_time",
-                    "description": "Get the current local time.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "User query related to time."}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_weather",
-                    "description": "Get detailed weather information for the user's location.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "User query related to weather."}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_location_info",
-                    "description": "Get detailed location information.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "User query related to location."}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "perform_search",
-                    "description": "Perform a web search based on the user's query.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Search query."},
-                            "max_results": {"type": "integer", "description": "Maximum number of search results to return."}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            }
-        ]
-
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Chatbot",
+                                "description": (
+                                    "This function is responsible for answering any user query. "
+                                    "Use it especially when the query involves real-time information, such as: "
+                                    "'what is the time', 'tell me the weather', 'where am I', or 'search about Einstein'. "
+                                    "Always call this function with the original user query, and add all relevant topics to the 'contexts' list. "
+                                    "Valid contexts: 'weather', 'time', 'location', 'search', 'general'. "
+                                    "If the query includes multiple topics, include all of them in 'contexts'."
+                                ),
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "query": {
+                                            "type": "string",
+                                            "description": "The user's original query"
+                                        },
+                                        "contexts": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "description": (
+                                                "The list of topics to answer from. Choose one or more from: 'weather', 'time', 'location', 'search', 'general'"
+                                            )
+                                        }
+                                    },
+                                    "required": ["query", "contexts"]
+                                }
+                            }
+                        }
+                    ]
+        # Map function name to actual callable
         self.function_map = {
-            "Chatbot": self.Chatbot.handle_query,
-            "get_time": self.realtime_info.get_time_info,
-            "get_weather": self.realtime_info.get_detailed_weather,
-            "get_location_info": self.realtime_info.get_location_info,
-            "perform_search": self.realtime_info.perform_search,
+            "Chatbot": self.Chatbot.handle_query
         }
 
     async def handle(self, user_input: str) -> str:
-        response = self.client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
-            messages=[{"role": "user", "content": user_input}],
-            tools=self.tools,
-            tool_choice="auto"
-        )
+        try:
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are Orion, a function-calling assistant. "
+                        "You must always respond using the 'Chatbot' function tool. "
+                        "Do NOT answer directly. Your job is only to select the function and arguments. "
+                        "Valid contexts: 'weather', 'time', 'location', 'search', 'general'."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": "How are you Orion and what is the weather and time and news today"
+                },
+                {
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": "tool1",
+                            "type": "function",
+                            "function": {
+                                "name": "Chatbot",
+                                "arguments": json.dumps({
+                                    "query": "How are you Orion and what is the weather and time?",
+                                    "contexts": ['general', 'weather', 'time']
+                                })
+                            },
+                            "id": "tool2",
+                            "type": "function",
+                            "function": {
+                                "name": "Chatbot",
+                                "arguments": json.dumps({
+                                    "query": "todays news",
+                                    "contexts": ["search"]
+                                })
+                            }
+                        }
+                    ]
+                },
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ]
 
-        choice = response.choices[0]
-        if choice.finish_reason == "tool_calls":
-            results = []
+            response = self.client.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=messages,
+                tools=self.tools,
+                tool_choice="auto"
+            )
 
-            for tool_call in choice.message.tool_calls:
-                func_name = tool_call.function.name
+            if not response or not response.choices:
+                return "❌ No response from model."
+
+            choice = response.choices[0]
+            message = choice.message
+
+            # ✅ TOOL CALL PATH
+            if choice.finish_reason == "tool_calls" and message and message.tool_calls:
+                tool_call = message.tool_calls[0]
                 args = json.loads(tool_call.function.arguments)
 
-                func = self.function_map.get(func_name)
-                if func:
-                    if asyncio.iscoroutinefunction(func):
-                        result = await func(**args)
-                    else:
-                        result = func(**args)
-                else:
-                    result = f"⚠️ Function '{func_name}' not implemented."
+                print(f"🧠 Calling Chatbot with: {args}")
+                result = await self.Chatbot.handle_query(**args)
 
-                results.append(f"🔧 {func_name} → {result}")
+        except Exception as e:
+            return f"🚨 Error: {str(e)}"
 
-            return "\n\n".join(results)
-
-        return choice.message.content
 
 # Run test
 async def test():
     model = OrionModel()
-    result = await model.handle("So what are you how are you orion and what about the Iran and Israel conflict and is there any issues for Trump in that conflict")
-# Only run if executed directly
+    result = await model.handle("How are you Orion and what is the weather and time? and news today")
+    print(result)
+    
+# Only run when this file is executed directly
 if __name__ == "__main__":
     asyncio.run(test())
