@@ -245,13 +245,13 @@ ORIGINAL USER QUERY: "{original_query}"
 
 INSTRUCTIONS:
 1. Analyze the search results thoroughly
-2. Provide a comprehensive, well-structured response addressing the user's query
+2. Provide a comprehensive, short, and well-structured response addressing the user's query
 3. Synthesize information from multiple sources when available
 4. Highlight key points and important findings
 5. Present a balanced view if there are conflicting perspectives
 6. If the search results are insufficient or irrelevant, acknowledge this limitation
 7. If you don't know the answer, simply state that you don't know
-8. Format your response in a clear, readable manner with appropriate headings and sections if needed"""
+8. Format your response in a clear, readable manner."""
                                 args["query"] = enhanced_query
                             
                             # Call Chatbot with enhanced query
