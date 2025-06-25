@@ -16,21 +16,6 @@ class OrionCore:
 
     async def process_input(self, user_input):
         try:
-            # Run the intent routing model
-            try:
-                response = await model(user_input)
-                    
-                # Otherwise, process the response as expected
-                responses = response
-            except Exception as e:
-                error_msg = f"❌ Error calling model: {str(e)}"
-                print(error_msg)
-                await self.tts.speak("Sorry, I encountered an error processing your request.")
-                return
-                
-            web_responses = ""
-            Query = f""
-
             try:
                 for Model, query in responses:
                     if Model.upper() in ["WEATHER", "TIME", "LOCATION", "SEARCH"]:

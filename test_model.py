@@ -22,6 +22,16 @@ async def test_model():
     print("\n🧪 Testing combined query...")
     response = await model("What time is it and search for Python programming tips")
     print(f"Response: {response}")
+    
+    # Test search with chatbot processing
+    print("\n🧪 Testing search with chatbot processing...")
+    response = await model("Tell me about the latest developments in quantum computing")
+    print(f"Response: {response}")
+    
+    # Test explicit search with chatbot explanation
+    print("\n🧪 Testing explicit search with chatbot explanation...")
+    response = await model("Search for climate change solutions and explain them to me")
+    print(f"Response: {response}")
 
 if __name__ == "__main__":
     asyncio.run(test_model())

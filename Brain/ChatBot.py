@@ -56,7 +56,7 @@ class Chatbot:
 --- 
 This is users query: {query}
 ---
-Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
+Please analyze this information carefully and provide a comprehensive, well-structured response that directly addresses the user's query. Synthesize the information from multiple sources when available, highlight key points, and present a balanced view if there are conflicting perspectives. If the information is insufficient or irrelevant, acknowledge this limitation in your response. If you don't know the answer, just say 'I don't know'."""
 
         reply = await self.process_query(query)
         return reply

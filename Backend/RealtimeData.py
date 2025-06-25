@@ -113,7 +113,7 @@ class RealTimeInformation:
             f"📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}"
         )
 
-    async def perform_search(self, query, max_results=3):
+    async def perform_search(self, query, max_results=3, min_summary_length=80):
         if not query or not isinstance(query, str):
             return f"❌ Invalid search query: {query}"
             
@@ -123,6 +123,16 @@ class RealTimeInformation:
                 error_msg = "❌ Search query cannot be empty"
                 print(error_msg)
                 return error_msg
+                
+            # Validate min_summary_length
+            if isinstance(min_summary_length, str):
+                try:
+                    min_summary_length = int(min_summary_length)
+                except ValueError:
+                    min_summary_length = 80  # Default if conversion fails
+            
+            # Ensure min_summary_length is within reasonable bounds
+            min_summary_length = min(max(30, min_summary_length), 500)  # Between 30 and 500 characters
                 
             # Convert max_results to integer if it's a string
             if isinstance(max_results, str):
@@ -146,7 +156,7 @@ class RealTimeInformation:
 
             results = []
             for link in valid_links:
-                summary = await self.scrape_summary(link)
+                summary = await self.scrape_summary(link, min_summary_length)
                 results.append(f"🔗 {link}\n📜 {summary or 'Summary not available'}")
 
             # Integrated Wikipedia inside search system
@@ -169,7 +179,7 @@ class RealTimeInformation:
             print(error_msg)
             return error_msg  # Always return a string, never None
 
-    async def scrape_summary(self, url):
+    async def scrape_summary(self, url, min_length=80):
         headers = {"User-Agent": "Mozilla/5.0"}
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
@@ -179,7 +189,7 @@ class RealTimeInformation:
             soup = BeautifulSoup(html, "html.parser")
             for p in soup.find_all("p"):
                 text = p.get_text().strip()
-                if len(text) > 80:
+                if len(text) > min_length:
                     return text
             return None
         except:
