@@ -17,25 +17,45 @@ class OrionCore:
     async def process_input(self, user_input):
         try:
             # Run the intent routing model
-            responses = await model(user_input)
-            print(f"🔄 Model responses: {responses}")
+            try:
+                response = await model(user_input)
+                    
+                # Otherwise, process the response as expected
+                responses = response
+            except Exception as e:
+                error_msg = f"❌ Error calling model: {str(e)}"
+                print(error_msg)
+                await self.tts.speak("Sorry, I encountered an error processing your request.")
+                return
+                
             web_responses = ""
             Query = f""
 
-            for Model, query in responses:
-                if Model.upper() in ["WEATHER", "TIME", "LOCATION", "SEARCH"]:
-                    web_responses += await RealTimeInformation().get(module=Model.upper(), query=query)
-                elif Model == "CHATBOT":
-                    Query = f"This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n{web_responses}\n\n --- \n\n This is users query: {query}\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
-                    await Chatbot(query=Query).process_query()
-                elif Model == "Exit":
-                    print("🛑 Exit signal from model.")
-                    self.exit_requested = True
-                else:
-                    print(f"🔎 Unknown intent: {Model} -> {query}")
+            try:
+                for Model, query in responses:
+                    if Model.upper() in ["WEATHER", "TIME", "LOCATION", "SEARCH"]:
+                        result = await RealTimeInformation().get(module=Model.upper(), query=query)
+                        web_responses += result if result else ""
+                    elif Model == "CHATBOT":
+                        Query = f"This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n\n{web_responses}\n\n --- \n\n This is users query: {query}\n\n --- \n\n Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+                        chatbot = Chatbot()
+                        reply = await chatbot.process_query(Query)
+                        print(f"Chatbot reply: {reply}")
+                        # The TTS is already handled in the chatbot.process_query method
+                    elif Model == "Exit":
+                        print("🛑 Exit signal from model.")
+                        self.exit_requested = True
+                    else:
+                        print(f"🔎 Unknown intent: {Model} -> {query}")
+            except Exception as e:
+                error_msg = f"❌ Error processing model response: {str(e)}"
+                print(error_msg)
+                await self.tts.speak("Sorry, I had trouble understanding how to respond to that.")
 
         except Exception as e:
-            print(f"❌ Error while processing input: {e}")
+            error_msg = f"❌ Error while processing input: {str(e)}"
+            print(error_msg)
+            await self.tts.speak("Sorry, something went wrong with your request.")
 
     async def run(self):
         while not self.exit_requested:

@@ -33,31 +33,33 @@ class Chatbot:
     async def handle_query(self, query, contexts:list = ["General"]):
         if not query:
             print("❌ Empty query received. Please provide a valid input.")
-            return
+            return "❌ Empty query received. Please provide a valid input."
         print(f"🗣️ User: {query}")
-        responce = ""
+        response = ""
         for context in contexts:
             if context.lower() == "weather":
-                responce += "\n" + await self.realtime_info.get_detailed_weather()
+                response += "\n" + await self.realtime_info.get_detailed_weather()
             elif context.lower() == "time":
-                responce += "\n" + await self.realtime_info.get_time_info()
+                response += "\n" + await self.realtime_info.get_time_info()
             elif context.lower() == "location":
-                responce += "\n" + await self.realtime_info.get_location_info()
+                response += "\n" + await self.realtime_info.get_location_info()
             elif context.lower() == "search":
-                responce += "\n" + await self.realtime_info.perform_search(query)
-            elif context.lower() == "gerneral":
+                # Search context is handled separately by the Search function
+                pass
+            elif context.lower() == "general":
                 pass  # General context, no action needed
 
-        if responce:
+        if response:
             query = f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
 ---
-{responce}
+{response}
 --- 
 This is users query: {query}
 ---
 Now, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."""
 
-        await self.process_query(query)
+        reply = await self.process_query(query)
+        return reply
 
     @staticmethod
     def load_chat_history_trimmed(filepath, user_query, max_history=6):
@@ -109,6 +111,8 @@ Now, please respond to the user with the best possible answer based on the infor
 
             # Append both user + assistant in one shot
             self._log_to_json("user", query, "assistant", reply)
+            
+            return reply
 
         except Exception as e:
             err = f"❌ Error while processing query: {e}"
@@ -116,6 +120,8 @@ Now, please respond to the user with the best possible answer based on the infor
             await self.tts.speak("Oops, something went wrong.")
             # Log the error as assistant response
             self._log_to_json("user", query, "assistant", err)
+            
+            return err
 
     def _log_to_json(self, role, content, assistant_role=None, assistant_content=None):
         try:

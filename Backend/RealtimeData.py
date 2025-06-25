@@ -6,6 +6,7 @@ from googlesearch import search
 import re
 from dotenv import load_dotenv
 import os
+
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
 
@@ -13,6 +14,19 @@ class RealTimeInformation:
     def __init__(self):
         self.location_data = None
         self.api_key = os.getenv('ipapiKey')
+        
+    async def get(self, module, query):
+        """Handle different types of information requests based on the module."""
+        if module == "WEATHER":
+            return await self.get_detailed_weather()
+        elif module == "TIME":
+            return await self.get_time_info()
+        elif module == "LOCATION":
+            return await self.get_location_info()
+        elif module == "SEARCH":
+            return await self.perform_search(query)
+        else:
+            return f"❌ Unknown module: {module}"
         
     async def get_location(self):
         async with aiohttp.ClientSession() as session:
@@ -100,7 +114,27 @@ class RealTimeInformation:
         )
 
     async def perform_search(self, query, max_results=3):
+        if not query or not isinstance(query, str):
+            return f"❌ Invalid search query: {query}"
+            
         try:
+            # Validate input
+            if not query or not isinstance(query, str) or query.strip() == "":
+                error_msg = "❌ Search query cannot be empty"
+                print(error_msg)
+                return error_msg
+                
+            # Convert max_results to integer if it's a string
+            if isinstance(max_results, str):
+                try:
+                    max_results = int(max_results)
+                except ValueError:
+                    max_results = 3  # Default if conversion fails
+            
+            # Ensure max_results is within reasonable bounds
+            max_results = min(max(1, max_results), 10)  # Between 1 and 10
+            
+            print(f"🔍 Searching for: {query} (max results: {max_results})")
             searcher = search(query, num_results=max_results, lang="en")
             links = list(searcher)
 
@@ -124,11 +158,16 @@ class RealTimeInformation:
                         data = await response.json()
                         if 'extract' in data:
                             results.append(f"📘 Wikipedia Summary:\n{data['extract']}")
-                except Exception:
-                    pass
-            return "\n\n".join(results) if results else "❌ No useful results found."
+                except Exception as e:
+                    print(f"Wikipedia lookup failed: {e}")
+            
+            search_results = f"🔍 Search Results for '{query}':\n\n{"\n\n".join(results) if results else "❌ No useful results found."}"
+            print(f"Found {len(results)} results for query: {query}")
+            return search_results
         except Exception as e:
-            return f"❌ Error during search: {str(e)}"
+            error_msg = f"❌ Error during search: {str(e)}"
+            print(error_msg)
+            return error_msg  # Always return a string, never None
 
     async def scrape_summary(self, url):
         headers = {"User-Agent": "Mozilla/5.0"}

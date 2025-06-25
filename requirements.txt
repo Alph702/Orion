@@ -1,2 +1,16 @@
-dotenv
+python-dotenv
 groq
+aiohttp
+bs4
+googlesearch-python
+speech_recognition
+sounddevice
+soundfile
+edge-tts
+gtts
+pyttsx3
+nest_asyncio
+asyncio
+json
+re
+datetime

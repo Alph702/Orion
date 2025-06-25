@@ -2026,5 +2026,109 @@
     {
         "role": "assistant",
         "content": "Currently, in Mirpur Khas, the time is 01:43 PM on Tuesday, 24 June 2025. As for the weather, it's overcast with a temperature of 37.0°C and a wind speed of 13.9 km/h coming from the southwest.\n\nUnfortunately, I couldn't find any summary or detailed information about the weather condition from the provided sources. However, I can suggest some popular news websites or sources if you'd like to catch up on the latest news. Would you like me to suggest some news sources?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Mirpur Khas\n🌤️ Condition: Overcast\n🌡️ Temperature: 31.9°C\n🌬️ Wind: 12.7 km/h from S\n🗕️ Date: Tuesday, 24 June 2025\n🕰️ Time: 09:39 PM\n🌍 Timezone: Asia/Karachi\n🔗 https://meteodays.com/en/weather/today/orion\n📜 The outlook for Orion today is for a slightly cloudy and hot day. The thermometer will read between 26 and 32° during the day, and 24 to 25 during the night. Calm wind conditions are predicted with a steady light breeze of 7 km/h and gusts of up to 29 km/h. The forecast calls for a minimal chance of precipitation for today.  Glance at the precise hour-by-hour weather forecast below.\n\n🔗 https://weather.com/weather/today/l/Orion+IL?canonicalCityId=62c5d90654b81c33c74693bb0a37d9da\n📜 Air quality is considered satisfactory, and air pollution poses little or no risk.\n\n🔗 https://meteologix.com/ng/weather/4904922-orion\n📜 Reference #18.97465868.1750783208.2587d921\nhttps://errors.edgesuite.net/18.97465868.1750783208.2587d921\n--- \nThis is users query: How are you Orion and what is the weather and time and news today\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! Currently, in Mirpur Khas, the time is 09:39 PM on Tuesday, 24 June 2025. As for the weather, it's overcast with a temperature of 31.9°C and a wind speed of 12.7 km/h coming from the south. According to the forecast, it's expected to be a slightly cloudy and hot day with calm wind conditions and a minimal chance of precipitation.\n\nAs for the news, I don't have any specific news updates to share with you right now. However, I can suggest some popular news websites or sources if you'd like to catch up on the latest news. Would you like me to suggest some news sources?\n\nBy the way, I'm glad to hear that the air quality is satisfactory, and air pollution poses little or no risk."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Mirpur Khas\n🌤️ Condition: Overcast\n🌡️ Temperature: 31.5°C\n🌬️ Wind: 12.4 km/h from S\n🗕️ Date: Tuesday, 24 June 2025\n🕰️ Time: 09:53 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: How are you Orion and what is the weather and time?\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! Currently, in Mirpur Khas, the time is 09:53 PM on Tuesday, 24 June 2025. As for the weather, it's overcast with a temperature of 31.5°C and a wind speed of 12.4 km/h coming from the south."
+    },
+    {
+        "role": "user",
+        "content": "How are you today?"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! I'm always ready to assist you with any questions or tasks you may have. How can I help you today?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Mirpur Khas\n🌤️ Condition: Overcast\n🌡️ Temperature: 31.4°C\n🌬️ Wind: 12.4 km/h from S\n--- \nThis is users query: What's the weather like?\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The weather is overcast with a temperature of 31.4°C and a wind speed of 12.4 km/h coming from the south."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n🗕️ Date: Tuesday, 24 June 2025\n🕰️ Time: 10:02 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: What time is it?\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "It's currently 10:02 PM on Tuesday, 24 June 2025."
+    },
+    {
+        "role": "user",
+        "content": "How are you today?"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! I'm always ready to assist you with any questions or tasks you may have. How can I help you today?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Mirpur Khas\n🌤️ Condition: Overcast\n🌡️ Temperature: 31.4°C\n🌬️ Wind: 12.4 km/h from S\n--- \nThis is users query: What's the weather like?\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "The weather in Mirpur Khas is overcast with a temperature of 31.4°C and a wind speed of 12.4 km/h coming from the south."
+    },
+    {
+        "role": "user",
+        "content": "I searched for 'latest news AI' and found the following information:\n\n🔍 Search Results for 'latest news AI':\n\n🔗 https://www.artificialintelligence-news.com/\n📜 AGI, Applications, Artificial Intelligence, Chatbots, Companies, Development, Ethics & Society, Virtual Assistants\n\n🔗 https://techcrunch.com/category/artificial-intelligence/\n📜 News coverage on artificial intelligence and machine learning tech, the companies building them, and the ethical issues AI raises today. This encompasses generative AI, including large language models, text-to-image and text-to-video models; speech recognition and generation; and predictive analytics.\n\n🔗 https://www.wsj.com/tech/ai\n📜 Summary not available\n\n🔗 https://www.reuters.com/technology/artificial-intelligence/\n📜 Summary not available\n\n🔗 https://news.microsoft.com/id-id/2025/06/23/microsoft-shares-latest-findings-from-2025-work-trend-index-unlocking-indonesias-potential-through-human-ai-collaboration/\n📜 As Indonesia enters a pivotal year for digital transformation, Microsoft has released new, Indonesia-specific findings from the 2025 Work Trend Index. The report highlights how artificial intelligence (AI) is reshaping the rules of business and the way people work. Notably, 97% of business leaders in Indonesia say 2025 is the year to rethink core facets of strategies and operations, outpacing global trends.\n\nBased on this information, please provide a comprehensive and helpful response."
+    },
+    {
+        "role": "assistant",
+        "content": "You're looking for the latest news on AI! I've got a summary for you.\n\nIt seems that there are several news outlets covering the latest developments in Artificial Intelligence, including Artificial Intelligence News, TechCrunch, The Wall Street Journal, and Reuters. These sources are reporting on various aspects of AI, such as AGI, applications, chatbots, companies, development, ethics, and virtual assistants.\n\nOne interesting piece of news I found is from Microsoft, which recently released its 2025 Work Trend Index, highlighting how AI is transforming the way businesses operate in Indonesia. According to the report, a significant 97% of business leaders in Indonesia believe that 2025 is the year to rethink their strategies and operations, ahead of global trends.\n\nThese are just a few examples of the latest news on AI. If you're interested in learning more, I can suggest checking out some of these sources or searching for more specific topics within the realm of AI."
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n🗕️ Date: Tuesday, 24 June 2025\n🕰️ Time: 10:05 PM\n🌍 Timezone: Asia/Karachi\n--- \nThis is users query: What time is it?\n---\nNow, please respond to the user with the best possible answer based on the information you have and the query provided. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "As of now, the current time is 10:05 PM on Tuesday, 24 June 2025, in the Asia/Karachi timezone."
+    },
+    {
+        "role": "user",
+        "content": "I searched for 'Python programming tips' and found the following information:\n\n🔍 Search Results for 'Python programming tips':\n\n🔗 https://www.datacamp.com/tutorial/python-tips-examples\n📜 Summary not available\n\n🔗 https://www.developernation.net/blog/11-tips-and-tricks-to-write-better-python-code/\n📜 Here are 11 tips and tricks that will help you write better Python code and become a better programmer:\n\n🔗 https://www.turing.com/kb/22-hottest-python-tricksfor-efficient-coding\n📜 Summary not available\n\nBased on this information, please provide a comprehensive and helpful response."
+    },
+    {
+        "role": "assistant",
+        "content": "You're looking for some valuable Python programming tips! I've got a few resources to share with you.\n\nIt seems that there are several websites offering tips and tricks to help you write better Python code and become a more efficient programmer. One article from Developer Nation provides 11 tips and tricks to improve your Python coding skills.\n\nIf you're interested in learning more, I can suggest checking out the resources I found, such as DataCamp and Turing. They might have some helpful tutorials, examples, or guides to enhance your Python programming experience.\n\nWould you like me to summarize some of the tips and tricks for you, or would you rather explore these resources on your own?"
+    },
+    {
+        "role": "user",
+        "content": "I am dumping"
+    },
+    {
+        "role": "assistant",
+        "content": "No worries! It seems like you're just letting me know that you're done with the conversation. If you need anything else or have more questions in the future, feel free to reach out to me anytime. Otherwise, have a great day!"
+    },
+    {
+        "role": "user",
+        "content": "boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom boom"
+    },
+    {
+        "role": "assistant",
+        "content": "I think you're just having a fun moment! Boom boom boom indeed! If you need to get back to something serious or have a question, I'm here to help. Otherwise, enjoy the boom-tastic vibes!"
+    },
+    {
+        "role": "user",
+        "content": "function calling AI in short"
+    },
+    {
+        "role": "assistant",
+        "content": "You want a brief explanation of function calling in AI?\n\nIn AI, a function call is when a program or model invokes a specific block of code, passing in input parameters to perform a task. This allows for modularity, reusability, and efficiency in coding. In AI applications, function calls can be used to execute tasks like data preprocessing, model training, or inference."
     }
 ]
