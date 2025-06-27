@@ -10,8 +10,6 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 import tempfile
-import pygame
-from pathlib import Path
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
@@ -23,7 +21,6 @@ if not groq_api:
 class OrionTTS:
     def __init__(self, engine="pyttsx3"):  # Options: gtts, edge, pyttsx3
         self.engine = engine.lower()
-        pygame.mixer.init()
         self.lock = asyncio.Lock()
     
     def _isruning(self):
@@ -92,47 +89,30 @@ class OrionTTS:
         
         self._start()
         engine = pyttsx3.init()
-        temp_path = "Brain/Data/audio.wav"
+        self.temp_path = "Brain/Data/audio.wav"
         self.stop()  # Stop any existing audio first
-        engine.save_to_file(text, temp_path)
+        engine.save_to_file(text, self.temp_path)
         engine.runAndWait()
 
         # Wait to ensure file is written completely
         await asyncio.sleep(0.2)
-
+        self._start()
         try:
-            pygame.mixer.music.load(temp_path)
-            self._start()  # Set running flag
-            pygame.mixer.music.play()
-
-            # Wait until playback finishes
-            while pygame.mixer.music.get_busy():
+            data, samplerate = sf.read(self.temp_path, dtype='float32')
+            sd.play(data, samplerate)
+            while sd.get_stream().active:
                 await asyncio.sleep(0.1)
-
         except Exception as e:
-            print(f"⚠️ TTS Playback Error: {e}")
+            print(f"⚠️ Playback error: {e}")
         finally:
-            self.stop()
-            time.sleep(0.2)
-            current_dir = Path.cwd()
-            parent_dir = current_dir.parent
-            print(f"{os.path.abspath(temp_path)}")
-            os.system(f'del /F /Q "{os.path.abspath(temp_path)}')
-
-        
-    def stop(self):
-        pygame.mixer.music.stop()
-        self._stop()
-
-    def pause(self):
-        if self._isruning():
-            pygame.mixer.music.pause()
             self._stop()
 
-    def unpause(self):
-        if not self._isruning():
-            pygame.mixer.music.unpause()
-            self._start()
+    def stop(self):
+        try:
+            sd.stop()
+            self._stop()
+        except Exception as e:
+            print(f"⚠️ Stop failed: {e}")
             
     def _speak_groq(self, text):
         start_time = time.time()

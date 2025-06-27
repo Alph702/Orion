@@ -2570,5 +2570,29 @@
     {
         "role": "assistant",
         "content": "No problem — could you say that again?"
+    },
+    {
+        "role": "user",
+        "content": "hello"
+    },
+    {
+        "role": "assistant",
+        "content": "Hello! It's nice to chat with you again. Is there something on your mind that you'd like to talk about or ask? I'm all ears!"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you repeat that, please?"
+    },
+    {
+        "role": "user",
+        "content": "hello"
+    },
+    {
+        "role": "assistant",
+        "content": "Hello! It's nice to meet you. Is there something I can help you with or would you like to chat for a bit?"
     }
 ]
