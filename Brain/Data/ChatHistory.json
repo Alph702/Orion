@@ -2714,5 +2714,109 @@
     {
         "role": "assistant",
         "content": "No problem — could you say that again?"
+    },
+    {
+        "role": "user",
+        "content": "hello"
+    },
+    {
+        "role": "assistant",
+        "content": "Hello! It's nice to meet you. Is there something I can help you with or would you like to chat?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you say that again?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "Haha! No worries, it seems like we're stuck in a loop! Could you please try saying something different, and I'll do my best to help?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "Let's start fresh! Could you repeat what you wanted to say or ask? I'm all ears!"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "Don't worry about it! It seems like we're having a little trouble communicating. Let's try again from scratch. What's on your mind? Do you have a question or need help with something?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem! Could you repeat that, please?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "Let's try again! Could you please repeat what you're trying to say? I'm here to listen and help!"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No worries! It seems like we're stuck in a loop. Let me try again. Could you please repeat what you originally wanted to say or ask? I'm here to assist you!"
+    },
+    {
+        "role": "user",
+        "content": "wake up"
+    },
+    {
+        "role": "assistant",
+        "content": "Rise and shine! I'm Orion, your friendly voice assistant. What can I help you with today?"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Karachi\n🌤️ Condition: Thunderstorm\n🌡️ Temperature: 29.4°C\n🌬️ Wind: 16.9 km/h from SW\n--- \nThis is users query: what's the weather what's the weather\n---\nPlease analyze this information carefully and provide a comprehensive, well-structured response that directly addresses the user's query. Synthesize the information from multiple sources when available, highlight key points, and present a balanced view if there are conflicting perspectives. If the information is insufficient or irrelevant, acknowledge this limitation in your response. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "I've got the latest weather update for you.\n\nAccording to my sources, the current weather in Karachi is a thunderstorm with a temperature of 29.4°C. The wind is blowing at a moderate speed of 16.9 kilometers per hour, coming from the southwest direction.\n\nSo, to answer your question, the weather in Karachi is quite stormy at the moment. Please make sure to take necessary precautions if you're planning to step out.\n\n(Note: I've verified the information with the provided data, but please keep in mind that weather forecasts can change rapidly. If you need more up-to-date information, I can try to fetch the latest data for you.)"
+    },
+    {
+        "role": "user",
+        "content": "Tujhe Dobara"
+    },
+    {
+        "role": "assistant",
+        "content": "I see what you did there! You said \"Tujhe Dobara\" which means \"Repeat\" or \"Say it again\" in Hindi. So, I'll repeat my previous response for you:\n\nAccording to my sources, the current weather in Karachi is a thunderstorm with a temperature of 29.4°C. The wind is blowing at a moderate speed of 16.9 kilometers per hour, coming from the southwest direction.\n\nSo, to answer your question, the weather in Karachi is quite stormy at the moment. Please make sure to take necessary precautions if you're planning to step out."
+    },
+    {
+        "role": "user",
+        "content": "Dariya Hai Hamara"
+    },
+    {
+        "role": "assistant",
+        "content": "I think you're testing my language skills! \"Dariya Hai Hamara\" is a Hindi phrase that means \"Our river\". However, I'm not sure what you're referring to or asking about.\n\nCould you please provide more context or clarify your question? Are you asking about a specific river, like the Indus River which runs through Karachi, or is this a figurative question?"
+    },
+    {
+        "role": "user",
+        "content": "stop hello"
+    },
+    {
+        "role": "assistant",
+        "content": "It seems like you're trying to stop our conversation and say hello at the same time! I'll respond to both parts of your message.\n\nTo stop our conversation, I'll simply pause and wait for your next input. If you want to end our conversation, just let me know, and I'll bid you farewell.\n\nAs for the hello part, Hello! It's nice to chat with you, even if it's just a brief exchange. Is there anything else you'd like to talk about or ask?"
     }
 ]

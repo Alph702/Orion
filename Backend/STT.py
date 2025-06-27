@@ -56,10 +56,9 @@ class FastNaturalSpeechRecognition:
                 print("🛑 Barge-in detected! Stopping TTS...")
                 self.tts.stop()
             print(f"🎤 Recognized (raw): {text}")
-            if not self.exit:
-                self.audio_handler.put_threadsafe(text, self.loop)
+            self.audio_handler.put_threadsafe(text, self.loop)
         except sr.UnknownValueError:
-            self.audio_handler.put_threadsafe("🤷 Sorry, I didn't catch that.", self.loop)
+            pass
         except sr.RequestError as e:
             self.audio_handler.put_threadsafe(f"🌐 API error: {e}", self.loop)
         except Exception as e:
@@ -106,10 +105,8 @@ class FastNaturalSpeechRecognition:
             return f"⚠️ Error: {e}"
 
     async def handle(self):
-        if self.tts._isruning():
-            return await self.get_audio_result()
-        else:
-            return await self.recognize_from_microphone()
+
+        return await self.get_audio_result()
 
     def stop(self):
         self.set_exit_status(True)
