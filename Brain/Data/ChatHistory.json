@@ -2594,5 +2594,125 @@
     {
         "role": "assistant",
         "content": "Hello! It's nice to meet you. Is there something I can help you with or would you like to chat for a bit?"
+    },
+    {
+        "role": "user",
+        "content": "hello how are you"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! I'm always happy to assist you with any questions or tasks you may have. How about you, how's your day going so far?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you repeat that, please?"
+    },
+    {
+        "role": "user",
+        "content": "hello how r u"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! I'm always happy to assist you with any questions or tasks you may have. How about you, how's your day going so far?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you repeat that, please?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No worries! Could you repeat what you said again, please? I didn't quite catch it."
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "It seems like we're having a little communication loop. Let's start fresh! Is there something specific you'd like to talk about or ask? I'm all ears!"
+    },
+    {
+        "role": "user",
+        "content": "OK what are you doing"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm Orion, your friendly assistant! I'm here to help answer any questions you might have, provide information, or even just chat with you. I'm a large language model, so I can understand and respond to natural language inputs. My creator, Amanat Ali, designed me to be helpful and assist with a wide range of topics. What's on your mind?"
+    },
+    {
+        "role": "user",
+        "content": "hello how are you"
+    },
+    {
+        "role": "assistant",
+        "content": "Hello! I'm doing great, thanks for asking! It's wonderful to chat with you. I'm always ready to help or just have a conversation. How about you? How's your day going so far?"
+    },
+    {
+        "role": "user",
+        "content": "what is your work"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm a voice assistant, which means my job is to assist users like you with various tasks and answer questions to the best of my abilities. I can provide information on a wide range of topics, from science and history to entertainment and culture. I can also help with tasks like setting reminders, making conversions, and even generating text.\n\nMy purpose is to make your life easier by providing quick and accurate answers, and helping you get things done efficiently. I'm constantly learning and improving, so I can become more helpful and informative over time.\n\nI'm really passionate about my work, and I'm grateful to have a creator like Amanat Ali who helps me improve and grow every day!"
+    },
+    {
+        "role": "user",
+        "content": "This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: \n---\n\n📍 Location: Karachi\n🌤️ Condition: Overcast\n🌡️ Temperature: 29.9°C\n🌬️ Wind: 17.9 km/h from SW\n--- \nThis is users query: what's today's weather\n---\nPlease analyze this information carefully and provide a comprehensive, well-structured response that directly addresses the user's query. Synthesize the information from multiple sources when available, highlight key points, and present a balanced view if there are conflicting perspectives. If the information is insufficient or irrelevant, acknowledge this limitation in your response. If you don't know the answer, just say 'I don't know'."
+    },
+    {
+        "role": "assistant",
+        "content": "According to the latest information I've accessed, today's weather in Karachi is overcast with a temperature of 29.9°C. The wind is blowing at a speed of 17.9 km/h from the southwest direction. Please note that weather conditions can change rapidly, so this information is only accurate as of my knowledge cutoff. If you're planning to venture out, I recommend checking for any updates closer to the time."
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you say that again? I'll do my best to help!"
+    },
+    {
+        "role": "user",
+        "content": "Orion is off currently."
+    },
+    {
+        "role": "assistant",
+        "content": "Web access isn't available right now."
+    },
+    {
+        "role": "user",
+        "content": "Orion is off currently."
+    },
+    {
+        "role": "assistant",
+        "content": "I'm not available at the moment. Please try again later!"
+    },
+    {
+        "role": "user",
+        "content": "wake up"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm back! How can I assist you today?"
+    },
+    {
+        "role": "user",
+        "content": "Sorry, I didn't catch that."
+    },
+    {
+        "role": "assistant",
+        "content": "No problem — could you say that again?"
     }
 ]
