@@ -56,7 +56,8 @@ class FastNaturalSpeechRecognition:
                 print("🛑 Barge-in detected! Stopping TTS...")
                 self.tts.stop()
             print(f"🎤 Recognized (raw): {text}")
-            self.audio_handler.put_threadsafe(text, self.loop)
+            if not self.exit:
+                self.audio_handler.put_threadsafe(text, self.loop)
         except sr.UnknownValueError:
             self.audio_handler.put_threadsafe("🤷 Sorry, I didn't catch that.", self.loop)
         except sr.RequestError as e:
@@ -96,7 +97,7 @@ class FastNaturalSpeechRecognition:
             self.get_exit_status()
             if self.exit and result.lower() in ["orion", "hi orion", "wake up"]:
                 self.set_exit_status(False)
-            return result if not self.exit else "Orion is off currently."
+            return result if not self.exit else None
         except sr.UnknownValueError:
             return "🤷 Sorry, I didn't catch that."
         except sr.RequestError as e:
