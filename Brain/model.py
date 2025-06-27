@@ -7,6 +7,7 @@ import asyncio
 
 from Brain.ChatBot import Chatbot
 from Backend.RealtimeData import RealTimeInformation
+from Backend.STT import FastNaturalSpeechRecognition
 
 # Load .env
 load_dotenv(dotenv_path='../.env')
@@ -19,6 +20,7 @@ class OrionModel:
         self.client = Groq(api_key=groq_api)
         self.realtime_info = RealTimeInformation()
         self.Chatbot = Chatbot()
+        self.stt = FastNaturalSpeechRecognition()
 
         # Tool definitions for Groq function calling
         self.tools = [
@@ -87,12 +89,32 @@ class OrionModel:
                                     "required": ["query"]
                                 }
                             }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Stop",
+                                "description": (
+                                    "This function is used to stop the assistant from listening or processing further requests. "
+                                    "It can be called when the user explicitly asks to stop the assistant, or when the assistant needs to pause its operations. "
+                                    "Example usage: 'stop listening', 'pause orion', 'exit', 'quit orion', 'stop orion', 'exit orion' and 'mute orion', 'mute', 'bye Orion'"
+                                ),
+                                "parameters": {}
+                            }
                         }
                     ]
         # Map function name to actual callable
+        # Ensure Stop is always an async function
+        async def async_stop_wrapper(*args, **kwargs):
+            result = self.stt.stop(*args, **kwargs)
+            if asyncio.iscoroutine(result):
+                return await result
+            return result
+
         self.function_map = {
             "Chatbot": self.Chatbot.handle_query,
-            "Search": self.realtime_info.perform_search
+            "Search": self.realtime_info.perform_search,
+            "Stop": async_stop_wrapper
         }
 
     async def handle(self, user_input: str) -> str:
@@ -309,7 +331,8 @@ async def model(user_input):
 
 # Run test
 async def test():
-    result = await model("How are you Orion and what is the weather and time? and news today")
+    # result = await model("How are you Orion and what is the weather and time? and news today")
+    result = await model("bye Orion")
     print(result)
     
 # Only run when this file is executed directly

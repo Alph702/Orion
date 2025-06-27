@@ -11,7 +11,7 @@ async def main():
             print("👋 Goodbye!")
             break
         if user_input.strip() == "":
-            user_input = await stt.recognize_from_microphone()
+            user_input = await stt.handle()
             print(f"🗣️ {user_input}")
         response = await model(user_input)
 
