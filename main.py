@@ -13,7 +13,7 @@ async def voice_loop():
             if not user_input.strip():
                 continue
             print(f"🗣️ {user_input}")
-            await model(user_input, stt.stop)
+            await model(user_input)
     except KeyboardInterrupt:
         stt.stop_background_listener()
         print("👋 Exiting on keyboard interrupt.")
