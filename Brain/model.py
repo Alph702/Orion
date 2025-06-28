@@ -1,210 +1,340 @@
-import re
 from dotenv import load_dotenv
 import os
-import asyncio
 import time
-from ast import literal_eval
 from groq import Groq
+import json
+import asyncio
 
-# Load environment variables from the .env file
+from Brain.ChatBot import Chatbot
+from Backend.RealtimeData import RealTimeInformation
+from Backend.STT import FastNaturalSpeechRecognition
+
+# Load .env
 load_dotenv(dotenv_path='../.env')
-
-# Retrieve the Groq API key
 groq_api = os.getenv('GroqAPI')
 if not groq_api:
-    raise ValueError("❌ GroqAPI environment variable is not set. Please check your .env file.")
+    raise ValueError("❌ GroqAPI not found in environment.")
 
-# Initialize the Groq client
-client = Groq(api_key=groq_api)
+class OrionModel:
+    def __init__(self):
+        self.client = Groq(api_key=groq_api)
+        self.realtime_info = RealTimeInformation()
+        self.Chatbot = Chatbot()
+        self.stt = FastNaturalSpeechRecognition()
 
-# Template for routing input through ORION
-SYSTEM_MESSAGE_TEMPLATE = """
-You are the intelligent routing brain of ORION.
+        # Tool definitions for Groq function calling
+        self.tools = [
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Chatbot",
+                                "description": (
+                                    "This function is responsible for answering any user query. "
+                                    "Use it especially when the query involves real-time information, such as: "
+                                    "'what is the time', 'tell me the weather', 'where am I', or 'search about Einstein'. "
+                                    "Always call this function with the original user query, and add all relevant topics to the 'contexts' list. "
+                                    "Valid contexts: 'weather', 'time', 'location', 'search', 'general'. "
+                                    "If the query includes multiple topics, include all of them in 'contexts'."
+                                ),
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "query": {
+                                            "type": "string",
+                                            "description": "The user's original query"
+                                        },
+                                        "contexts": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "description": (
+                                                "The list of topics to answer from. Choose one or more from: 'weather', 'time', 'location', 'search', 'general'"
+                                            )
+                                        }
+                                    },
+                                    "required": ["query", "contexts"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Search",
+                                "description": (
+                                    "This function is responsible for performing web searches based on user queries. "
+                                    "Use it when the user explicitly asks to search for information on the web, "
+                                    "or when the query requires up-to-date information that might not be in your training data. "
+                                    "Examples include: 'search for latest news', 'look up information about a recent event', "
+                                    "or 'find details about a specific topic'."
+                                ),
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "query": {
+                                            "type": "string",
+                                            "description": "The search query to be executed"
+                                        },
+                                        "max_results": {
+                                            "type": "integer",
+                                            "description": "Maximum number of search results to return (default: 3)",
+                                            "default": 3
+                                        },
+                                        "min_summary_length": {
+                                            "type": "integer",
+                                            "description": "Minimum length of text to extract from each search result (default: 80, min: 30, max: 500)",
+                                            "default": 80
+                                        }
+                                    },
+                                    "required": ["query"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Stop",
+                                "description": (
+                                    "This function is used to stop the assistant from listening or processing further requests. "
+                                    "It can be called when the user explicitly asks to stop the assistant, or when the assistant needs to pause its operations. "
+                                    "Example usage: 'stop listening', 'pause orion', 'exit', 'quit orion', 'stop orion', 'exit orion' and 'mute orion', 'mute', 'bye Orion'"
+                                ),
+                                "parameters": {}
+                            }
+                        }
+                    ]
+        # Map function name to actual callable
+        # Ensure Stop is always an async function
+        async def async_stop_wrapper(*args, **kwargs):
+            result = self.stt.stop(*args, **kwargs)
+            if asyncio.iscoroutine(result):
+                return await result
+            return result
 
-🎯 YOUR JOB:
-You will process a user's spoken or typed input and output a valid routing structure using actionable module commands. You must:
+        self.function_map = {
+            "Chatbot": self.Chatbot.handle_query,
+            "Search": self.realtime_info.perform_search,
+            "Stop": async_stop_wrapper
+        }
 
-1. Identify the user's true intent.
-2. Convert the input into one or more precise, simplified queries.
-3. Remove all filler/polite words: "please", "can you", "would you", "I want to", "yo", "orion", "hmm", "uh", "tell me", "kindly", "just", "like", etc.
-4. Simplify formal or complex wording into short, direct phrases.
-5. Assign each query to the correct MODULE.
-6. Always include the original user input as the final `CHATBOT` entry, unless it is only casual/filler.
-7. Avoid duplication of meaning across modules.
-
----
-
-📦 STRICT FORMAT (MANDATORY):
-
-✅ Must be a **single-line Python list of lists**, like:
-
-[
-    ['MODULE', 'Cleaned Query'],
-    ['MODULE', 'Another Cleaned Query'],
-    ['CHATBOT', 'Original user message']
-]
-
-✅ Always:
-- Use **single quotes `'`** only (not double quotes).
-- Return output in **one line only** (no line breaks).
-- Be valid Python syntax that can be parsed by `ast.literal_eval()`.
-- Place the `CHATBOT` entry **at the end**, unless it's the **only** module.
-- Do **not repeat** the same query in multiple modules.
-
-❌ Never:
-- ❌ Use JSON format
-- ❌ Use double quotes
-- ❌ Add explanations, comments, markdown, or new lines
-- ❌ Use multiline formatting or duplicate `CHATBOT` entries
-- ❌ Mix CHATBOT anywhere except at the end (or alone)
-
----
-
-📚 MODULES:
-
-- `WEATHER` — Weather questions (e.g., rain, temperature)
-- `LOCATION` — Location questions (e.g., "Where am I?")
-- `TIME` — Time or date questions
-- `SEARCH` — Real-world facts, people, events, info
-- `SYSTEM_COMMANDS` — OS/app actions (e.g., open Notion)
-- `CUSTOM_SKILL_MUSIC` — Music playback/control
-- `CUSTOM_SKILL_HOME` — Smart home commands (lights, fan)
-- `CUSTOM_SKILL_STUDY` — Study tools, Notion, Anki, tasks
-- `Exit` — Shutdown commands like "exit", "quit"
-- `CHATBOT` — Small talk, emotions, unknowns (always last unless only item)
-
----
-
-⚠️ SPECIAL RULES:
-
-- If the input is only filler (e.g., "yo", "orion?") → return only `[['CHATBOT', 'yo']]`
-- If it's about exiting (e.g., "quit", "shutdown") → add `['Exit', 'Exit Orion']` and still include `CHATBOT` at the end
-- If it's small talk, jokes, feelings → just use `CHATBOT`
-- If unclear, always route to `CHATBOT` as fallback
-
----
-
-💡 EXAMPLES (STRICTLY ONE-LINE):
-
-User: "Can you open Notion, and what's the weather like today?"  
-[
-    ['SYSTEM_COMMANDS', 'Open Notion'], ['WEATHER', 'Weather today'], ['CHATBOT', "Can you open Notion, and what's the weather like today?"]
-]
-
-User: "Where am I right now and who is the president of Pakistan?"  
-[
-    ['LOCATION', 'Current location'], ['SEARCH', 'President of Pakistan'], ['CHATBOT', 'Where am I right now and who is the president of Pakistan?']
-]
-
-User: "Play some music and turn on the light in my room."  
-[
-    ['CUSTOM_SKILL_MUSIC', 'Play music'], ['CUSTOM_SKILL_HOME', 'Turn on room light'], ['CHATBOT', 'Play some music and turn on the light in my room.']
-]
-
-User: "Please tell me the time and open my study notes."  
-[
-    ['TIME', 'Current time'], ['CUSTOM_SKILL_STUDY', 'Open study notes'], ['CHATBOT', 'Please tell me the time and open my study notes.']
-]
-
-User: "Yo Orion, what's going on?"  
-[
-    ['CHATBOT', "Yo Orion, what's going on?"]
-]
-
-User: "What's the date and is it going to rain today?"  
-[
-    ['TIME', 'Current date'], ['WEATHER', 'Rain forecast today'], ['CHATBOT', "What's the date and is it going to rain today?"]
-]
-
-User: "Tell me who is Elon Musk and open YouTube."  
-[
-    ['SEARCH', 'Who is Elon Musk'], ['SYSTEM_COMMANDS', 'Open YouTube'], ['CHATBOT', 'Tell me who is Elon Musk and open YouTube.']
-]
-
-User: "Close Orion."  
-[
-    ['Exit', 'Exit Orion'], ['CHATBOT', 'Close Orion.']
-]
-
-User: "Hmm okay"  
-[
-    ['CHATBOT', 'Hmm okay']
-]
-
-User: "Start my study session and play lofi music"  
-[
-    ['CUSTOM_SKILL_STUDY', 'Start study session'], ['CUSTOM_SKILL_MUSIC', 'Play lofi music'], ['CHATBOT', 'Start my study session and play lofi music']
-]
-
-User: "Search for Python decorators and show me today's temperature."  
-[
-    ['SEARCH', 'Python decorators'], ['WEATHER', 'Today temperature'], ['CHATBOT', 'Search for Python decorators and show me today's temperature.']
-]
-
-User: "What time is it and where am I?"  
-[
-    ['TIME', 'Current time'], ['LOCATION', 'Current location'], ['CHATBOT', 'What time is it and where am I?']
-]
-
----
-
-Now respond in that exact format (a **single Python-valid one-line list of lists**) for this user input:
-
-{user_input}
-"""
-
-def safe_parse_routing(raw_output: str):
-    try:
-        fixed_output = raw_output.strip().replace("'", "'")
-
-        if not fixed_output.startswith('['):
-            fixed_output = f'[{fixed_output}]'
-
-        print("🧾 Fixed Output:", fixed_output)
-        parsed = literal_eval(fixed_output)
-
-        if not isinstance(parsed, list) or not all(
-            isinstance(pair, list) and len(pair) == 2 and all(isinstance(x, str) for x in pair)
-            for pair in parsed
-        ):
-            raise ValueError("Invalid format")
-
-        return parsed
-
-    except Exception as e:
-        print("❌ Parsing Failed:", e)
-        return [['CHATBOT', "Sorry, I couldn't understand that."]]
-
-
-async def model(user_input: str):
-    """
-    Asynchronously processes user input and returns a list of routing commands.
-    """
-    start_time = time.time()
-
-    try:
-        response = await asyncio.to_thread(
-            client.chat.completions.create,
-            messages=[
+    async def handle(self, user_input: str) -> str:
+        try:
+            messages = [
                 {
                     "role": "system",
-                    "content": SYSTEM_MESSAGE_TEMPLATE.replace("{user_input}", user_input),
+                    "content": (
+                        "You are Orion, a function-calling assistant. "
+                        "You must always respond using either the 'Chatbot' or 'Search' function tools, or both when appropriate. "
+                        "Do NOT answer directly. Your job is only to select the function and arguments. "
+                        "For general queries or queries about weather, time, location, use the 'Chatbot' function with appropriate contexts. "
+                        "Valid contexts for Chatbot: 'weather', 'time', 'location', 'search', 'general'. "
+                        "For explicit web search requests, use the 'Search' function. "
+                        "When a query requires both search and conversation, use BOTH functions - the Search results will be automatically fed into the Chatbot for a comprehensive response. "
+                        "For example, if the user asks 'Tell me about the latest AI news', call both Search (for 'latest AI news') and Chatbot (to process and explain the results)."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": "How are you Orion and what is the weather and time and search for latest news today"
+                },
+                {
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": "tool1",
+                            "type": "function",
+                            "function": {
+                                "name": "Chatbot",
+                                "arguments": json.dumps({
+                                    "query": "How are you Orion and what is the weather and time?",
+                                    "contexts": ['general', 'weather', 'time']
+                                })
+                            }
+                        },
+                        {
+                            "id": "tool2",
+                            "type": "function",
+                            "function": {
+                                "name": "Search",
+                                "arguments": json.dumps({
+                                    "query": "latest news today",
+                                    "max_results": 3
+                                })
+                            }
+                        }
+                    ]
+                },
+                {
+                    "role": "user",
+                    "content": user_input
                 }
-            ],
-            model="gemma2-9b-it",
-            temperature=1,
-            top_p=1,
-            stream=False,
-            stop=None,
-        )
+            ]
 
-        content = response.choices[0].message.content.strip()
-    except Exception as e:
-        print("❌ Completion Failed:", e)
-        return [['CHATBOT', "Sorry, something went wrong."]]
+            response = self.client.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=messages,
+                tools=self.tools,
+                tool_choice="auto"
+            )
 
-    end_time = time.time()
-    print(f"⏱️ Function execution time: {end_time - start_time:.2f} seconds")
+            if not response or not response.choices:
+                return "❌ No response from model."
 
-    # Safely parse the content and return result
-    return safe_parse_routing(content)
+            choice = response.choices[0]
+            message = choice.message
+
+            # ✅ TOOL CALL PATH
+            if choice.finish_reason == "tool_calls" and message and message.tool_calls:
+                results = []
+                search_results = ""
+                
+                # First pass: Process all Search function calls
+                for tool_call in message.tool_calls:
+                    try:
+                        function_name = tool_call.function.name
+                        if function_name == "Search":
+                            print(f"🔍 Processing Search tool call")
+                            try:
+                                args = json.loads(tool_call.function.arguments)
+                                print(f"🧠 Calling Search with: {args}")
+                                
+                                # Extract min_summary_length from query if explicitly mentioned
+                                query = args.get('query', '')
+                                if 'min_summary_length=' in query:
+                                    try:
+                                        # Extract the value after min_summary_length=
+                                        min_length_str = query.split('min_summary_length=')[1].split()[0]
+                                        # Remove any non-numeric characters
+                                        min_length_str = ''.join(c for c in min_length_str if c.isdigit())
+                                        if min_length_str:
+                                            args['min_summary_length'] = int(min_length_str)
+                                            # Remove the parameter from the query
+                                            args['query'] = query.replace(f'min_summary_length={min_length_str}', '').strip()
+                                            print(f"📏 Extracted min_summary_length={args['min_summary_length']} from query")
+                                    except Exception as e:
+                                        print(f"⚠️ Failed to extract min_summary_length: {str(e)}")
+                                
+                                # Ensure min_summary_length is passed if not provided
+                                if 'min_summary_length' not in args:
+                                    args['min_summary_length'] = 80  # Default value
+                                    
+                                search_result = await self.realtime_info.perform_search(**args)
+                                if search_result:
+                                    # Format search results for better readability
+                                    formatted_result = f"\n\n=== SEARCH RESULTS FOR '{args.get('query', 'unknown query')}' ===\n{search_result}\n=== END OF SEARCH RESULTS ===\n"
+                                    search_results += formatted_result
+                                    print(f"✅ Search returned results")
+                            except Exception as e:
+                                error_msg = f"❌ Error executing Search for '{args.get('query', 'unknown query')}': {str(e)}"
+                                print(error_msg)
+                                search_results += f"\n\n=== SEARCH ERROR ===\n{error_msg}\n=== END OF SEARCH ERROR ===\n"
+                    except Exception as e:
+                        error_msg = f"❌ Error processing Search tool call: {str(e)}"
+                        print(error_msg)
+                        search_results += f"\n\n=== SEARCH PROCESSING ERROR ===\n{error_msg}\n=== END OF SEARCH PROCESSING ERROR ===\n"
+                
+                # Second pass: Process all other function calls, with special handling for Chatbot
+                for tool_call in message.tool_calls:
+                    try:
+                        function_name = tool_call.function.name
+                        print(f"🔍 Processing tool call: {function_name}")
+                        
+                        # Skip Search calls as they were already processed
+                        if function_name == "Search":
+                            continue
+                            
+                        # Parse arguments with error handling
+                        try:
+                            args = json.loads(tool_call.function.arguments)
+                        except json.JSONDecodeError as e:
+                            error_msg = f"❌ Invalid JSON in arguments for {function_name}: {str(e)}"
+                            print(error_msg)
+                            results.append(error_msg)
+                            continue
+                        
+                        # Special handling for Chatbot to include search results
+                        if function_name == "Chatbot":
+                            print(f"🧠 Calling Chatbot with search results")
+                            original_query = args.get("query", "")
+                            
+                            # If we have search results, include them in the Chatbot query
+                            if search_results:
+                                enhanced_query = f"""I've gathered some real-time information from the web to help answer this query. This information may not always be 100% accurate, so please verify with other sources when possible.
+
+{search_results}
+
+ORIGINAL USER QUERY: "{original_query}"
+
+INSTRUCTIONS:
+1. Analyze the search results thoroughly
+2. Provide a comprehensive, short, and well-structured response addressing the user's query
+3. Synthesize information from multiple sources when available
+4. Highlight key points and important findings
+5. Present a balanced view if there are conflicting perspectives
+6. If the search results are insufficient or irrelevant, acknowledge this limitation
+7. If you don't know the answer, simply state that you don't know
+8. Format your response in a clear, readable manner."""
+                                args["query"] = enhanced_query
+                            
+                            # Call Chatbot with enhanced query
+                            try:
+                                result = await self.Chatbot.handle_query(**args)
+                                if result is not None:  # Only append non-None results
+                                    print(f"✅ Chatbot returned result")
+                                    results.append(result)
+                                else:
+                                    print(f"⚠️ Chatbot returned None")
+                            except Exception as e:
+                                error_msg = f"❌ Error executing Chatbot with query '{original_query[:30]}...': {str(e)}"
+                                print(error_msg)
+                                results.append(f"An error occurred while processing your request: {str(e)}. Please try again or rephrase your query.")
+                        # Handle other functions normally
+                        elif function_name in self.function_map:
+                            print(f"🧠 Calling {function_name} with: {args}")
+                            function_to_call = self.function_map[function_name]
+                            
+                            # Call function with error handling
+                            try:
+                                result = await function_to_call(**args)
+                                if result is not None:  # Only append non-None results
+                                    print(f"✅ {function_name} returned result of type: {type(result)}")
+                                    results.append(result)
+                                else:
+                                    print(f"⚠️ {function_name} returned None")
+                            except Exception as e:
+                                error_msg = f"❌ Error executing {function_name}: {str(e)}"
+                                print(error_msg)
+                                results.append(error_msg)
+                        else:
+                            error_msg = f"❌ Unknown function: {function_name}"
+                            print(error_msg)
+                            results.append(error_msg)
+                    except Exception as e:
+                        error_msg = f"❌ Error processing tool call: {str(e)}"
+                        print(error_msg)
+                        results.append(error_msg)
+                
+                return "\n".join(results) if results else "❌ No results from function calls."
+
+        except Exception as e:
+            error_msg = f"🚨 Error in model.handle: {str(e)}"
+            print(error_msg)
+            return error_msg
+
+
+# Create an instance of the model to be imported by other modules
+model_instance = OrionModel()
+
+# Function to be imported by other modules
+async def model(user_input):
+    return await model_instance.handle(user_input)
+
+# Run test
+async def test():
+    # result = await model("How are you Orion and what is the weather and time? and news today")
+    result = await model("bye Orion")
+    print(result)
+    
+# Only run when this file is executed directly
+if __name__ == "__main__":
+    asyncio.run(test())

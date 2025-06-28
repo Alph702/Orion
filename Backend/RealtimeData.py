@@ -14,16 +14,15 @@ class RealTimeInformation:
     def __init__(self):
         self.location_data = None
         self.api_key = os.getenv('ipapiKey')
-
+        
     async def get(self, module, query):
-        self.location_data = await self.get_location()
-        module = module.upper()
+        """Handle different types of information requests based on the module."""
         if module == "WEATHER":
             return await self.get_detailed_weather()
         elif module == "TIME":
-            return self.get_time_info()
+            return await self.get_time_info()
         elif module == "LOCATION":
-            return self.get_location_info()
+            return await self.get_location_info()
         elif module == "SEARCH":
             return await self.perform_search(query)
         else:
@@ -59,6 +58,10 @@ class RealTimeInformation:
                 }
 
     async def get_detailed_weather(self):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
         lat = self.location_data["latitute"]
         lon = self.location_data["longitude"]
         if not lat or not lon:
@@ -86,7 +89,11 @@ class RealTimeInformation:
             f"🌬️ Wind: {wind_speed} km/h from {self.degrees_to_compass(wind_dir)}"
         )
 
-    def get_time_info(self):
+    async def get_time_info(self):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
         now = datetime.now()
         return (
             f"🗕️ Date: {now.strftime('%A, %d %B %Y')}\n"
@@ -94,7 +101,11 @@ class RealTimeInformation:
             f"🌍 Timezone: {self.location_data['timezone']}"
         )
 
-    def get_location_info(self):
+    async def get_location_info(self):
+        if not self.location_data:
+            self.location_data = await self.get_location()
+            if "error" in self.location_data:
+                return f"❌ Error fetching location: {self.location_data['error']}"
         return (
             f"📍 City: {self.location_data['city']}\n"
             f"🗺️ Region: {self.location_data['region']}\n"
@@ -102,8 +113,38 @@ class RealTimeInformation:
             f"📌 Coordinates: {self.location_data['latitute']}, {self.location_data['longitude']}"
         )
 
-    async def perform_search(self, query, max_results=3):
+    async def perform_search(self, query, max_results=3, min_summary_length=80):
+        if not query or not isinstance(query, str):
+            return f"❌ Invalid search query: {query}"
+            
         try:
+            # Validate input
+            if not query or not isinstance(query, str) or query.strip() == "":
+                error_msg = "❌ Search query cannot be empty"
+                print(error_msg)
+                return error_msg
+                
+            # Validate min_summary_length
+            if isinstance(min_summary_length, str):
+                try:
+                    min_summary_length = int(min_summary_length)
+                except ValueError:
+                    min_summary_length = 80  # Default if conversion fails
+            
+            # Ensure min_summary_length is within reasonable bounds
+            min_summary_length = min(max(30, min_summary_length), 500)  # Between 30 and 500 characters
+                
+            # Convert max_results to integer if it's a string
+            if isinstance(max_results, str):
+                try:
+                    max_results = int(max_results)
+                except ValueError:
+                    max_results = 3  # Default if conversion fails
+            
+            # Ensure max_results is within reasonable bounds
+            max_results = min(max(1, max_results), 10)  # Between 1 and 10
+            
+            print(f"🔍 Searching for: {query} (max results: {max_results})")
             searcher = search(query, num_results=max_results, lang="en")
             links = list(searcher)
 
@@ -115,7 +156,7 @@ class RealTimeInformation:
 
             results = []
             for link in valid_links:
-                summary = await self.scrape_summary(link)
+                summary = await self.scrape_summary(link, min_summary_length)
                 results.append(f"🔗 {link}\n📜 {summary or 'Summary not available'}")
 
             # Integrated Wikipedia inside search system
@@ -127,14 +168,18 @@ class RealTimeInformation:
                         data = await response.json()
                         if 'extract' in data:
                             results.append(f"📘 Wikipedia Summary:\n{data['extract']}")
-                except Exception:
-                    pass
-
-            return "\n\n".join(results) if results else "❌ No useful results found."
+                except Exception as e:
+                    print(f"Wikipedia lookup failed: {e}")
+            
+            search_results = f"🔍 Search Results for '{query}':\n\n{"\n\n".join(results) if results else "❌ No useful results found."}"
+            print(f"Found {len(results)} results for query: {query}")
+            return search_results
         except Exception as e:
-            return f"❌ Error during search: {str(e)}"
+            error_msg = f"❌ Error during search: {str(e)}"
+            print(error_msg)
+            return error_msg  # Always return a string, never None
 
-    async def scrape_summary(self, url):
+    async def scrape_summary(self, url, min_length=80):
         headers = {"User-Agent": "Mozilla/5.0"}
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
@@ -144,7 +189,7 @@ class RealTimeInformation:
             soup = BeautifulSoup(html, "html.parser")
             for p in soup.find_all("p"):
                 text = p.get_text().strip()
-                if len(text) > 80:
+                if len(text) > min_length:
                     return text
             return None
         except:
@@ -165,7 +210,6 @@ class RealTimeInformation:
         ix = int((degree + 22.5) / 45.0) % 8
         return dirs[ix]
 
-RealTimeInformation = RealTimeInformation()
-# Example usage:
-location = asyncio.run(RealTimeInformation.get("weather", ""))
-print(location)
+# RealTimeInformation = RealTimeInformation()
+# # Example usage:
+# asyncio.run(RealTimeInformation.get_location_info("Where am I?"))

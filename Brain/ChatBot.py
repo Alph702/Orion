@@ -5,12 +5,13 @@ import time
 import json
 from groq import Groq
 from Backend import TTS
+from Backend.RealtimeData import RealTimeInformation
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
 
 class Chatbot:
-    def __init__(self, query=None):
+    def __init__(self):
         # 1) Load Groq API key
         self.groq_api = os.getenv('GroqAPI')
         if not self.groq_api:
@@ -19,6 +20,7 @@ class Chatbot:
         # 2) Initialize client & TTS
         self.client = Groq(api_key=self.groq_api)
         self.tts    = TTS.OrionTTS(engine="pyttsx3")  # You can switch to 'gtts' or 'edge'
+        self.realtime_info = RealTimeInformation()
 
         # 3) Path to your existing JSON (with manual system prompt already inside)
         self.db_file = os.path.join('Brain', 'Data', 'ChatHistory.json')
@@ -28,11 +30,36 @@ class Chatbot:
             with open(self.db_file, 'w', encoding='utf-8') as f:
                 json.dump([], f, ensure_ascii=False, indent=4)
 
-        # 4) Handle the query
-        self.query = query
+    async def handle_query(self, query, contexts:list = ["General"]):
+        if not query:
+            print("❌ Empty query received. Please provide a valid input.")
+            return "❌ Empty query received. Please provide a valid input."
+        print(f"🗣️ User: {query}")
+        response = ""
+        for context in contexts:
+            if context.lower() == "weather":
+                response += "\n" + await self.realtime_info.get_detailed_weather()
+            elif context.lower() == "time":
+                response += "\n" + await self.realtime_info.get_time_info()
+            elif context.lower() == "location":
+                response += "\n" + await self.realtime_info.get_location_info()
+            elif context.lower() == "search":
+                # Search context is handled separately by the Search function
+                pass
+            elif context.lower() == "general":
+                pass  # General context, no action needed
 
+        if response:
+            query = f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 
+---
+{response}
+--- 
+This is users query: {query}
+---
+Please analyze this information carefully and provide a comprehensive, well-structured response that directly addresses the user's query. Synthesize the information from multiple sources when available, highlight key points, and present a balanced view if there are conflicting perspectives. If the information is insufficient or irrelevant, acknowledge this limitation in your response. If you don't know the answer, just say 'I don't know'."""
 
-        print(f"🗣️ User: {self.query}")
+        reply = await self.process_query(query)
+        return reply
 
     @staticmethod
     def load_chat_history_trimmed(filepath, user_query, max_history=6):
@@ -56,7 +83,7 @@ class Chatbot:
         # 🔹 Combine: system prompt + trimmed history + new query
         return system_prompt + trimmed
 
-    async def process_query(self):
+    async def process_query(self, query):
         try:
             start = time.time()
 
@@ -65,7 +92,7 @@ class Chatbot:
                 history = json.load(f)
 
             # Build messages: history + current user message
-            messages = self.load_chat_history_trimmed(self.db_file, self.query)
+            messages = self.load_chat_history_trimmed(self.db_file, query)
 
             # Ask the model
             resp = self.client.chat.completions.create(
@@ -83,14 +110,18 @@ class Chatbot:
             await self.tts.speak(reply)
 
             # Append both user + assistant in one shot
-            self._log_to_json("user", self.query, "assistant", reply)
+            self._log_to_json("user", query, "assistant", reply)
+            
+            return reply
 
         except Exception as e:
             err = f"❌ Error while processing query: {e}"
             print(err)
             await self.tts.speak("Oops, something went wrong.")
             # Log the error as assistant response
-            self._log_to_json("user", self.query, "assistant", err)
+            self._log_to_json("user", query, "assistant", err)
+            
+            return err
 
     def _log_to_json(self, role, content, assistant_role=None, assistant_content=None):
         try:
@@ -121,4 +152,5 @@ class Chatbot:
 
 # # 🔧 Example usage:
 # if __name__ == "__main__":
-#     Chatbot(query="Who am I. Who is your boss and what is photosynthesis?")
+#     bot = Chatbot()
+#     bot.handle_query("Who am I. Who is your boss and what is photosynthesis?")
