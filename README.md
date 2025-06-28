@@ -49,21 +49,6 @@ Orion/
 ├── requirements.txt      # Python dependencies
 ├── .gitignore            # Git ignore file
 └── README.md             # Project documentation
-=======
-│   ├── RealtimeData.py       # Real-time data fetching and processing
-│   ├── STT.py                # Speech-to-text engine integrations
-│   └── TTS.py                # Text-to-speech engine integrations
-├── Brain/
-│   ├── ChatBot.py            # Main chatbot logic and conversation management
-│   ├── model.py              # Core logic for intent routing and module selection
-│   └── Data/
-│       ├── ChatHistory.json  # Conversation history and context
-│       └── orionconfig.json  # User and system configuration
-├── .env                      # Environment variables
-├── .gitignore                # Git ignore file
-├── main.py                   # Entry point for the application
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project documentation
 ```
 
 ---
