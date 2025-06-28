@@ -7,7 +7,7 @@ import asyncio
 
 from Brain.ChatBot import Chatbot
 from Backend.RealtimeData import RealTimeInformation
-from Backend.STT import FastNaturalSpeechRecognition
+# from Backend.STT import FastNaturalSpeechRecognition
 
 # Load .env
 load_dotenv(dotenv_path='../.env')
@@ -16,11 +16,11 @@ if not groq_api:
     raise ValueError("❌ GroqAPI not found in environment.")
 
 class OrionModel:
-    def __init__(self):
+    def __init__(self, stop_function:function):
         self.client = Groq(api_key=groq_api)
         self.realtime_info = RealTimeInformation()
         self.Chatbot = Chatbot()
-        self.stt = FastNaturalSpeechRecognition()
+        self.stop_function = stop_function
 
         # Tool definitions for Groq function calling
         self.tools = [
@@ -105,8 +105,8 @@ class OrionModel:
                     ]
         # Map function name to actual callable
         # Ensure Stop is always an async function
-        async def async_stop_wrapper(*args, **kwargs):
-            result = self.stt.stop(*args, **kwargs)
+        async def async_stop_wrapper():
+            result = self.stop_function()
             if asyncio.iscoroutine(result):
                 return await result
             return result
@@ -323,10 +323,11 @@ INSTRUCTIONS:
 
 
 # Create an instance of the model to be imported by other modules
-model_instance = OrionModel()
+
 
 # Function to be imported by other modules
-async def model(user_input):
+async def model(user_input, stop_function:function):
+    model_instance = OrionModel(stop_function=stop_function)
     return await model_instance.handle(user_input)
 
 # Run test
