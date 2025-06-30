@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Widget</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+    <style>
+    #floating-map-widget {
+        position: fixed;
+        top: 40px;
+        left: 40px;
+        width: 420px;
+        height: 320px;
+        background: #fff;
+        border: 1.5px solid #888;
+        border-radius: 12px;
+        z-index: 9999;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+        overflow: hidden;
+    }
+    #floating-map-widget .widget-header {
+        cursor: move;
+        background: #222;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        padding: 8px 36px 8px 16px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        position: relative;
+        user-select: none;
+    }
+    #floating-map-widget #close-map-widget {
+        position: absolute;
+        top: 7px;
+        right: 14px;
+        cursor: pointer;
+        font-size: 20px;
+        color: #fff;
+        background: none;
+        border: none;
+        outline: none;
+    }
+    #floating-map-widget #widget-map {
+        width: 100%;
+        height: calc(100% - 38px);
+        border-radius: 0 0 12px 12px;
+    }
+    </style>
+</head>
+<body>
+<div id="floating-map-widget">
+    <div class="widget-header">
+        Route to Statesboro, GA
+        <span id="close-map-widget" title="Close">&times;</span>
+    </div>
+    <div id="widget-map"></div>
+</div>
+<script>
+    const coords = {{ coords | tojson }};
+    const widgetMap = L.map('widget-map').setView(coords[0] || [24.86, 67.01], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(widgetMap);
+    coords.forEach((coord, i) => {
+        const marker = L.marker(coord).addTo(widgetMap);
+        marker.bindPopup("Point " + (i + 1));
+    });
+    if (coords.length >= 2) {
+        L.Routing.control({
+            waypoints: coords.map(c => L.latLng(c[0], c[1])),
+            routeWhileDragging: false,
+            addWaypoints: false
+        }).addTo(widgetMap);
+    }
+    document.getElementById("close-map-widget").onclick = function() {
+        document.getElementById("floating-map-widget").style.display = "none";
+    };
+    // --- Make floating widget draggable ---
+    (function() {
+        const widget = document.getElementById("floating-map-widget");
+        const header = widget.querySelector('.widget-header');
+        let offsetX = 0, offsetY = 0, isDragging = false;
+        header.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            offsetX = e.clientX - widget.offsetLeft;
+            offsetY = e.clientY - widget.offsetTop;
+            document.body.style.userSelect = "none";
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                widget.style.left = (e.clientX - offsetX) + 'px';
+                widget.style.top = (e.clientY - offsetY) + 'px';
+            }
+        });
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            document.body.style.userSelect = "";
+        });
+    })();
+    // --- end draggable ---
+</script>
+</body>
+</html>
