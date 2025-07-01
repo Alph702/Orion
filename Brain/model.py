@@ -4,10 +4,12 @@ import time
 from groq import Groq
 import json
 import asyncio
+import requests
 
 from Brain.ChatBot import Chatbot
 from Backend.RealtimeData import RealTimeInformation
 from Backend.STT import FastNaturalSpeechRecognition
+from Backend.map.map_manager import MapManager
 
 # Load .env
 load_dotenv(dotenv_path='../.env')
@@ -21,6 +23,7 @@ class OrionModel:
         self.realtime_info = RealTimeInformation()
         self.Chatbot = Chatbot()
         self.stt = FastNaturalSpeechRecognition()
+        self.map_manager = MapManager()
 
         # Tool definitions for Groq function calling
         self.tools = [
@@ -101,6 +104,134 @@ class OrionModel:
                                 ),
                                 "parameters": {}
                             }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "search_location",
+                                "description": "Show a location on the map widget. Use when the user asks to show, find, or locate a place on the map.",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "location": {
+                                            "type": "string",
+                                            "description": "The name of the location to show on the map"
+                                        }
+                                    },
+                                    "required": ["location"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "ClearMap",
+                                "description": "Clear all markers and routes from the map widget.",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "add_location",
+                                "description": "Add a location to the map. Optionally provide latitude and longitude.",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": "The name of the location to add"
+                                        },
+                                        "lat": {
+                                            "type": ["number", "null"],
+                                            "description": "Latitude of the location (optional)"
+                                        },
+                                        "lon": {
+                                            "type": ["number", "null"],
+                                            "description": "Longitude of the location (optional)"
+                                        }
+                                    },
+                                    "required": ["name"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "clear_locations",
+                                "description": "Remove all locations from the map.",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_locations",
+                                "description": "Get a list of all location names currently on the map.",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_coordinates",
+                                "description": "Get a list of all coordinates (latitude, longitude) for locations on the map.",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_route_distances",
+                                "description": "Get the list of routes and total distance for all consecutive locations with coordinates.",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_directions",
+                                "description": "Get driving directions, distance, and duration between two named locations.",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "origin": {
+                                            "type": "string",
+                                            "description": "The name of the origin location"
+                                        },
+                                        "destination": {
+                                            "type": "string",
+                                            "description": "The name of the destination location"
+                                        }
+                                    },
+                                    "required": ["origin", "destination"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_place_details",
+                                "description": "Get detailed information for a place by name using Nominatim.",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "place_name": {
+                                            "type": "string",
+                                            "description": "The name of the place to get details for"
+                                        }
+                                    },
+                                    "required": ["place_name"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_location_tuples",
+                                "description": "Get the raw list of all location tuples (name, lat, lon) or (name,).",
+                                "parameters": {"type": "object", "properties": {}}
+                            }
                         }
                     ]
         # Map function name to actual callable
@@ -111,10 +242,66 @@ class OrionModel:
                 return await result
             return result
 
+        async def search_location(location: str):
+            # Call Flask API to add marker
+            try:
+                # Use the /api/locations POST endpoint and trigger map update in browser
+                resp = requests.post("http://localhost:5000/api/locations", json={"location": location})
+                # Try to trigger map update in browser (if possible)
+                # If you have a websocket or event system, trigger it here.
+                # Otherwise, you may need to call fetchAndUpdateMap() from the browser after this API call.
+                # For now, just print the response for debugging:
+                print("Map API response:", resp.status_code, resp.text)
+            except Exception as e:
+                print(f"Map API error: {e}")
+
+        async def clear_map():
+            try:
+                requests.post("http://localhost:5000/api/clear")
+            except Exception as e:
+                print(f"Map API error: {e}")
+
+        async def add_location(name, lat=None, lon=None):
+            self.map_manager.add_location(name, lat, lon)
+            return f"Location '{name}' added."
+
+        async def clear_locations():
+            self.map_manager.clear_locations()
+            return "All locations cleared."
+
+        async def get_locations():
+            return self.map_manager.get_locations()
+
+        async def get_coordinates():
+            return self.map_manager.get_coordinates()
+
+        async def get_route_distances():
+            routes, total = self.map_manager.get_route_distances()
+            return {"routes": routes, "total": total}
+
+        async def get_directions(origin, destination):
+            return self.map_manager.get_directions(origin, destination)
+
+        async def get_place_details(place_name):
+            return self.map_manager.get_place_details(place_name)
+
+        async def get_location_tuples():
+            return self.map_manager.get_location_tuples()
+
         self.function_map = {
             "Chatbot": self.Chatbot.handle_query,
             "Search": self.realtime_info.perform_search,
-            "Stop": async_stop_wrapper
+            "Stop": async_stop_wrapper,
+            "search_location": search_location,
+            "ClearMap": clear_map,
+            "add_location": add_location,
+            "clear_locations": clear_locations,
+            "get_locations": get_locations,
+            "get_coordinates": get_coordinates,
+            "get_route_distances": get_route_distances,
+            "get_directions": get_directions,
+            "get_place_details": get_place_details,
+            "get_location_tuples": get_location_tuples,
         }
 
     async def handle(self, user_input: str) -> str:

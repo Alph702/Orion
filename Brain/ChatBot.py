@@ -6,6 +6,7 @@ import json
 from groq import Groq
 from Backend import TTS
 from Backend.RealtimeData import RealTimeInformation
+from Backend.map.map_manager import MapManager
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
@@ -21,6 +22,7 @@ class Chatbot:
         self.client = Groq(api_key=self.groq_api)
         self.tts    = TTS.OrionTTS(engine="pyttsx3")  # You can switch to 'gtts' or 'edge'
         self.realtime_info = RealTimeInformation()
+        self.map_manager = MapManager()
 
         # 3) Path to your existing JSON (with manual system prompt already inside)
         self.db_file = os.path.join('Brain', 'Data', 'ChatHistory.json')
@@ -48,6 +50,56 @@ class Chatbot:
                 pass
             elif context.lower() == "general":
                 pass  # General context, no action needed
+
+        # Map context integration
+        if "map" in [c.lower() for c in contexts] or "location" in [c.lower() for c in contexts]:
+            locations = self.map_manager.get_locations()
+            coords = self.map_manager.get_coordinates()
+            routes, total = self.map_manager.get_route_distances()
+            if locations:
+                response += f"\n📍 Current locations: {', '.join(locations)}"
+            else:
+                response += "\n📍 There are no locations currently on the map."
+            if len(coords) >= 2 and routes:
+                route_str = "; ".join([f"{r[0]} ({r[1]} km)" if r[1] else r[0] for r in routes])
+                response += f"\n🛣️ Routes: {route_str}"
+                if total:
+                    response += f"\nTotal route distance: {total} km"
+        # Optionally, handle map commands in the query (add/clear/directions/details)
+        if "add location" in query.lower():
+            parts = query.lower().split("add location")
+            if len(parts) > 1:
+                loc = parts[1].strip().capitalize()
+                self.map_manager.add_location(loc)
+                response += f"\n✅ Added location: {loc}"
+        if "clear map" in query.lower():
+            self.map_manager.clear_locations()
+            response += "\n🗑️ Cleared all locations from the map."
+        if "directions from" in query.lower() and "to" in query.lower():
+            # Example: "directions from Paris to Berlin"
+            try:
+                q = query.lower()
+                start = q.index("directions from") + len("directions from")
+                end = q.index("to")
+                origin = q[start:end].strip().capitalize()
+                destination = q[end+2:].strip().capitalize()
+                result = self.map_manager.get_directions(origin, destination)
+                if "distance" in result:
+                    response += f"\n🧭 Directions: {origin} → {destination}: {result['distance']}, {result['duration']}"
+                else:
+                    response += f"\n❌ {result.get('error', 'Could not get directions.')}"
+            except Exception as e:
+                response += f"\n❌ Error parsing directions: {e}"
+        if "place details" in query.lower():
+            # Example: "place details Paris"
+            parts = query.lower().split("place details")
+            if len(parts) > 1:
+                place = parts[1].strip().capitalize()
+                details = self.map_manager.get_place_details(place)
+                if "error" not in details:
+                    response += f"\nℹ️ Details for {place}: {details}"
+                else:
+                    response += f"\n❌ {details['error']}"
 
         if response:
             query = f"""This realtime information from web and other ways of getting information is not always accurate, so please verify it with other sources if you can. Here are the results: 

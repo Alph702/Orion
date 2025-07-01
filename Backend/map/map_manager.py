@@ -1,10 +1,9 @@
-import math
 import requests
 import time
 
 class MapManager:
     def __init__(self):
-        self.locations = []
+        self.locations = []  # List of (name, lat, lon) or (name,)
 
     def search_location(self, location: str):
         """
@@ -84,37 +83,69 @@ class MapManager:
                     # "geometry": route["geometry"]
                 }
         return {"error": "Unable to retrieve directions."}
-    
-    def add_location(self, name, lat, lon):
-        self.locations.append((name, float(lat), float(lon)))
+
+    def add_location(self, name, lat=None, lon=None):
+        """
+        Add a location by name, optionally with coordinates.
+        """
+        if lat is not None and lon is not None:
+            self.locations.append((name, float(lat), float(lon)))
+        else:
+            self.locations.append((name,))
 
     def get_locations(self):
-        return self.locations
-
-    def clear_locations(self):
-        self.locations = []
+        """
+        Return a list of all location names.
+        """
+        return [loc[0] for loc in self.locations]
 
     def get_coordinates(self):
-        return [(lat, lon) for (_, lat, lon) in self.locations]
+        """
+        Return a list of [lat, lon] for locations that have coordinates.
+        """
+        coords = []
+        for loc in self.locations:
+            if len(loc) == 3:
+                coords.append([loc[1], loc[2]])
+        return coords
 
-    def calculate_distance(self, lat1, lon1, lat2, lon2):
-        R = 6371
-        d_lat = math.radians(lat2 - lat1)
-        d_lon = math.radians(lon2 - lon1)
-        a = math.sin(d_lat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return round(R * c, 2)
+    def clear_locations(self):
+        """
+        Clear all stored locations.
+        """
+        self.locations = []
 
     def get_route_distances(self):
+        """
+        Return a list of (route, distance) tuples and total distance if coordinates exist, else None.
+        """
         routes = []
         total = 0
         for i in range(len(self.locations) - 1):
-            name1, lat1, lon1 = self.locations[i]
-            name2, lat2, lon2 = self.locations[i + 1]
-            dist = self.calculate_distance(lat1, lon1, lat2, lon2)
-            total += dist
-            routes.append((f"{name1} → {name2}", dist))
-        return routes, total
+            loc1 = self.locations[i]
+            loc2 = self.locations[i + 1]
+            name1 = loc1[0]
+            name2 = loc2[0]
+            if len(loc1) == 3 and len(loc2) == 3:
+                dist = self.calculate_distance(loc1[1], loc1[2], loc2[1], loc2[2])
+                total += dist
+                routes.append((f"{name1} → {name2}", dist))
+            else:
+                routes.append((f"{name1} → {name2}", None))
+        return routes, total if routes and routes[0][1] is not None else None
+
+    def calculate_distance(self, lat1, lon1, lat2, lon2):
+        """
+        Calculate the great-circle distance between two points (Haversine formula).
+        """
+        from math import radians, sin, cos, sqrt, atan2
+        R = 6371  # Earth radius in kilometers
+        lat1, lon1, lat2, lon2 = map(float, (lat1, lon1, lat2, lon2))
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+        a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return round(R * c, 2)
 
     def get_place_id(self, location: str) -> str:
         """
@@ -176,3 +207,9 @@ class MapManager:
         else:
             print(f"API request failed with status code {response.status_code}")
             return {"error": f"Status code {response.status_code}"}
+
+    def get_location_tuples(self):
+        """
+        Return the raw list of location tuples (name, lat, lon) or (name,).
+        """
+        return self.locations

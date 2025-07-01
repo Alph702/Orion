@@ -19,6 +19,12 @@
         z-index: 9999;
         box-shadow: 0 4px 24px rgba(0,0,0,0.25);
         overflow: hidden;
+        resize: both;
+        min-width: 280px;
+        min-height: 180px;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: block;
     }
     #floating-map-widget .widget-header {
         cursor: move;
@@ -31,6 +37,7 @@
         border-top-right-radius: 12px;
         position: relative;
         user-select: none;
+        transition: background 0.2s;
     }
     #floating-map-widget #close-map-widget {
         position: absolute;
@@ -47,40 +54,69 @@
         width: 100%;
         height: calc(100% - 38px);
         border-radius: 0 0 12px 12px;
+        transition: height 0.2s, width 0.2s;
+    }
+    #open-map-widget-btn {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 10000;
+        background: #222;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 7px 18px;
+        font-size: 15px;
+        cursor: pointer;
+        display: none;
     }
     </style>
 </head>
 <body>
+<button id="open-map-widget-btn">Open Map</button>
 <div id="floating-map-widget">
-    <div class="widget-header">
-        Route to Statesboro, GA
+    <div class="widget-header" id="widget-header">
+        <span id="widget-header-title">Route to Statesboro, GA</span>
         <span id="close-map-widget" title="Close">&times;</span>
     </div>
     <div id="widget-map"></div>
 </div>
 <script>
+    // --- Dynamic header logic ---
+    function setMapHeader(title) {
+        document.getElementById("widget-header-title").textContent = title;
+    }
+
+    // --- Map logic ---
     const coords = {{ coords | tojson }};
+    const locations = {{ locations | tojson }};
+
     const widgetMap = L.map('widget-map').setView(coords[0] || [24.86, 67.01], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(widgetMap);
-    coords.forEach((coord, i) => {
-        const marker = L.marker(coord).addTo(widgetMap);
-        marker.bindPopup("Point " + (i + 1));
+
+    // --- Resize map on widget resize ---
+    const widget = document.getElementById("floating-map-widget");
+    const widgetMapDiv = document.getElementById("widget-map");
+    let resizeObserver = new ResizeObserver(() => {
+        widgetMap.invalidateSize();
     });
-    if (coords.length >= 2) {
-        L.Routing.control({
-            waypoints: coords.map(c => L.latLng(c[0], c[1])),
-            routeWhileDragging: false,
-            addWaypoints: false
-        }).addTo(widgetMap);
-    }
+    resizeObserver.observe(widget);
+
+    // --- Close/Open logic ---
     document.getElementById("close-map-widget").onclick = function() {
-        document.getElementById("floating-map-widget").style.display = "none";
+        widget.style.display = "none";
+        document.getElementById("open-map-widget-btn").style.display = "block";
     };
+    document.getElementById("open-map-widget-btn").onclick = function() {
+        widget.style.display = "block";
+        document.getElementById("open-map-widget-btn").style.display = "none";
+        setTimeout(() => widgetMap.invalidateSize(), 200);
+    };
+
     // --- Make floating widget draggable ---
     (function() {
-        const widget = document.getElementById("floating-map-widget");
         const header = widget.querySelector('.widget-header');
         let offsetX = 0, offsetY = 0, isDragging = false;
         header.addEventListener('mousedown', function(e) {
@@ -101,6 +137,100 @@
         });
     })();
     // --- end draggable ---
+
+    // --- Map state management ---
+    let currentRoutingControl = null;
+    let currentMarkers = [];
+    let lastCoordsJSON = "";
+
+    function clearMapLayers() {
+        // Remove all markers
+        currentMarkers.forEach(marker => widgetMap.removeLayer(marker));
+        currentMarkers = [];
+        // Remove routing control if exists
+        if (currentRoutingControl) {
+            try { widgetMap.removeControl(currentRoutingControl); } catch {}
+            currentRoutingControl = null;
+        }
+        // Remove any other polylines (fallback)
+        widgetMap.eachLayer(function (layer) {
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) widgetMap.removeLayer(layer);
+        });
+    }
+
+    function fetchAndUpdateMap(autoOpen = true) {
+        fetch('/api/locations', { method: 'GET' })
+            .then(res => res.json())
+            .then(data => {
+                clearMapLayers();
+
+                if ((!data.coords || data.coords.length === 0) && autoOpen) {
+                    widget.style.display = "none";
+                    document.getElementById("open-map-widget-btn").style.display = "block";
+                    setMapHeader("No locations");
+                    return;
+                }
+
+                // Add markers
+                data.coords.forEach((coord, i) => {
+                    let popupText = "Point " + (i + 1);
+                    if (data.locations && data.locations[i]) {
+                        popupText = data.locations[i];
+                    }
+                    const marker = L.marker(coord).addTo(widgetMap);
+                    marker.bindPopup(popupText);
+                    currentMarkers.push(marker);
+                });
+
+                // Add route if more than one location with coordinates
+                if (data.coords && data.coords.length >= 2) {
+                    currentRoutingControl = L.Routing.control({
+                        waypoints: data.coords.map(c => L.latLng(c[0], c[1])),
+                        routeWhileDragging: false,
+                        addWaypoints: false
+                    }).addTo(widgetMap);
+                }
+
+                // Update header
+                if (data.locations && data.locations.length > 0) {
+                    setMapHeader("Route to " + data.locations[data.locations.length - 1]);
+                }
+
+                // Auto-open the map widget if hidden and requested
+                if (autoOpen && widget.style.display === "none" && data.coords.length > 0) {
+                    widget.style.display = "block";
+                    document.getElementById("open-map-widget-btn").style.display = "none";
+                    setTimeout(() => widgetMap.invalidateSize(), 200);
+                }
+            });
+    }
+
+    window.fetchAndUpdateMap = fetchAndUpdateMap;
+
+    // Initial map load
+    fetchAndUpdateMap(false);
+
+    // Listen for a custom event to update the map instantly and auto-open
+    window.addEventListener("orion-map-update", function() {
+        fetchAndUpdateMap(true);
+    });
+
+    // Expose a function to update the map and auto-open
+    window.orionUpdateMap = function() { fetchAndUpdateMap(true); };
+
+    // Poll for backend changes every 1s for instant update
+    function pollAndUpdateMap() {
+        fetch('/api/locations', { method: 'GET' })
+            .then(res => res.json())
+            .then(data => {
+                const coordsJSON = JSON.stringify(data.coords);
+                if (coordsJSON !== lastCoordsJSON) {
+                    lastCoordsJSON = coordsJSON;
+                    fetchAndUpdateMap(true);
+                }
+            });
+    }
+    setInterval(pollAndUpdateMap, 1000);
 </script>
 </body>
 </html>
