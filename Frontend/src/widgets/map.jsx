@@ -22,6 +22,8 @@ export default function MapWidget() {
   const [loading, setLoading] = useState(false);
   const position = useRef({ x: 40, y: 40 });
 
+  const closeWidget = () => setOpen(false);
+
   const initMap = () => {
     if (!mapRef.current && mapDivRef.current) {
       mapRef.current = L.map(mapDivRef.current).setView([24.86, 67.01], 10);
@@ -82,6 +84,16 @@ export default function MapWidget() {
       setLoading(false);
     }
   };
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") closeWidget();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
 
   // 🧲 Drag widget from header
   useEffect(() => {
@@ -145,7 +157,7 @@ export default function MapWidget() {
       <div className="map-destination-header route-header">
         <span>🧭 Route: {origin} → {destination}</span>
         <button
-          onClick={() => setOpen(false)}
+          onClick={closeWidget}
           className="close-map-widget"
           title="Close Map Widget"
           aria-label="Close"
