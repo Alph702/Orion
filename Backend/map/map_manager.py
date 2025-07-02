@@ -21,7 +21,7 @@ class MapManager:
             response = requests.get(API_URL, params=params, headers=headers)
             print(f"Request URL: {response.url}")
         except Exception as e:
-            print(f"Request failed: {e}")
+            print(f"[MapManager] Nominatim request failed for '{location}': {e}")
             return None
 
         if response.status_code == 403:
@@ -65,8 +65,12 @@ class MapManager:
             "Accept-Language": "en-US,en;q=0.9",
             "Referer": "https://yourproject.example.com/"
         }
-        response = requests.get(f"{API_URL}/{origin_str};{destination_str}", params=params, headers=headers)
-        print(f"Request URL: {response.url}")
+        try:
+            response = requests.get(f"{API_URL}/{origin_str};{destination_str}", params=params, headers=headers)
+            print(f"Request URL: {response.url}")
+        except Exception as e:
+            print(f"[MapManager] OSRM request failed: {e}")
+            return {"error": "Unable to retrieve directions."}
         
         if response.status_code == 200:
             data = response.json()
@@ -163,7 +167,7 @@ class MapManager:
             response = requests.get(API_URL, params=params, headers=headers)
             print(f"Request URL: {response.url}")
         except Exception as e:
-            print(f"Request failed: {e}")
+            print(f"[MapManager] Nominatim request failed for '{location}': {e}")
             return None
 
         if response.status_code == 200:
@@ -174,7 +178,7 @@ class MapManager:
                 print(f"No place_id found for location: {location}")
         else:
             print(f"API request failed with status code {response.status_code}")
-        return None
+            return None
 
     def get_place_details(self, place_name: str) -> dict:
         """

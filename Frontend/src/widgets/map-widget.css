@@ -1,0 +1,171 @@
+.floating-map-widget {
+    position: fixed;
+    top: 40px;
+    left: 40px;
+    width: 420px;
+    height: 320px;
+    background: #222; /* Dark background */
+    color: #fff; /* Light text */
+    border: 1.5px solid #888;
+    border-radius: 12px;
+    z-index: 1000;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.32);
+    overflow: hidden;
+    resize: both;
+    min-width: 280px;
+    min-height: 180px;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: block;
+    transition: box-shadow 0.2s, left 0.1s, top 0.1s;
+}
+.floating-map-widget .close-map-widget {
+    position: absolute;
+    top: 7px;
+    right: 14px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #fff;
+    background: none;
+    border: none;
+    outline: none;
+    transition: color 0.2s, background 0.2s;
+    padding: 0 6px;
+    line-height: 1;
+    border-radius: 4px;
+}
+.floating-map-widget .close-map-widget:hover,
+.floating-map-widget .close-map-widget:focus {
+    color: #ff5252;
+    background: #222;
+}
+.floating-map-widget .widget-map {
+    width: 100%;
+    height: calc(100% - 38px);
+    border-radius: 0 0 12px 12px;
+    background: #fff !important; /* Ensure map area is light */
+    color: #222 !important;      /* Map controls/text default */
+    border-top: 1px solid #333;
+}
+.open-map-widget-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 10000;
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-size: 15px;
+    cursor: pointer;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.2s, color 0.2s;
+}
+.open-map-widget-btn:hover,
+.open-map-widget-btn:focus {
+    background: #fff;
+    color: #222;
+}
+.map-widget-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding: 10px 16px 6px 16px;
+    background: #232323;
+    border-bottom: 1px solid #333;
+    border-radius: 0 0 8px 8px;
+}
+.map-widget-add-btn,
+.map-widget-clear-btn {
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 2px;
+}
+.map-widget-add-btn:disabled,
+.map-widget-clear-btn:disabled {
+    background: #888;
+    cursor: not-allowed;
+}
+.map-widget-add-btn:hover:not(:disabled),
+.map-widget-clear-btn:hover:not(:disabled) {
+    background: #fff;
+    color: #222;
+}
+.map-widget-coords-toggle {
+    background: #eee;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 18px;
+    cursor: pointer;
+    height: 32px;
+    margin-left: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+.map-widget-coords-toggle:hover,
+.map-widget-coords-toggle:focus {
+    background: #222;
+    color: #fff;
+}
+.map-widget-error {
+    font-size: 14px;
+    margin: 4px 0 0 0;
+    min-height: 18px;
+    color: #ff5252;
+    font-weight: 500;
+    padding-left: 2px;
+}
+.leaflet-routing-container {
+    margin-top: 48px !important; /* Prevent overlap with widget header */
+    z-index: 10001 !important;
+    background: #fff !important;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    padding: 8px 12px;
+}
+.leaflet-control-attribution,
+.leaflet-control-attribution a {
+    background: #fff !important;
+    color: #222 !important;
+}
+.map-destination-header {
+    cursor: grab;
+    background: #222;
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 36px 8px 16px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    position: relative;
+    user-select: none;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    min-height: 25px;
+}
+.map-destination-header:active {
+    cursor: grabbing;
+}
+.route-title {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding-right: 8px;
+}
