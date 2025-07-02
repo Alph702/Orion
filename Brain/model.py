@@ -9,7 +9,7 @@ import requests
 from Brain.ChatBot import Chatbot
 from Backend.RealtimeData import RealTimeInformation
 from Backend.STT import FastNaturalSpeechRecognition
-from Backend.map.map_manager import MapManager
+from Backend.map_manager import MapManager
 
 # Load .env
 load_dotenv(dotenv_path='../.env')

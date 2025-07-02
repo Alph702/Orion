@@ -1,124 +1,98 @@
-// src/widgets/MapWidget.jsx
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet-routing-machine";
 import "./map-widget.css";
 
-export default function MapWidget({ apiUrl = "/api/locations", pollingInterval = 10000 }) {
-  const [open, setOpen] = useState(true);
-  const [destination, setDestination] = useState("karachi");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: "/static/marker-icon.png",
+  shadowUrl: "/static/marker-shadow.png"
+});
 
+export default function MapWidget() {
   const mapRef = useRef(null);
   const mapDivRef = useRef(null);
   const routingRef = useRef(null);
-  const markersRef = useRef([]);
   const widgetRef = useRef(null);
 
+  const [origin] = useState("Karachi");
+  const [destination] = useState("Hyderabad");
+  const [open, setOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
   const position = useRef({ x: 40, y: 40 });
 
-  // 🗺️ Initialize map only once
-  const initMap = useCallback(() => {
+  const initMap = () => {
     if (!mapRef.current && mapDivRef.current) {
-      const map = L.map(mapDivRef.current, {
-        zoomControl: false,
-        attributionControl: false,
-      }).setView([24.86, 67.01], 10);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        detectRetina: true,
-        reuseTiles: true,
-        updateWhenIdle: true,
-      }).addTo(map);
-
-      mapRef.current = map;
+      mapRef.current = L.map(mapDivRef.current).setView([24.86, 67.01], 10);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapRef.current);
     }
-  }, []);
-
-  // 🧹 Clear old markers/routes
-  const clearMapLayers = () => {
-    markersRef.current.forEach(marker => mapRef.current.removeLayer(marker));
-    markersRef.current = [];
-
-    if (routingRef.current) {
-      try {
-        mapRef.current.removeControl(routingRef.current);
-      } catch {}
-      routingRef.current = null;
-    }
-
-    mapRef.current.eachLayer(layer => {
-      if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
-        mapRef.current.removeLayer(layer);
-      }
-    });
   };
 
-  // 🔄 Fetch and update map
-  const updateMap = useCallback(async () => {
-    if (!mapRef.current) return;
+  const fetchCoords = async (location) => {
+    const res = await fetch("/api/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ location })
+    });
+    const data = await res.json();
+    return data.location || null;
+  };
 
+  const drawRoute = async () => {
     setLoading(true);
-    setError("");
     try {
-      const res = await fetch(apiUrl);
+      const res = await fetch("/api/directions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ origin, destination })
+      });
       const data = await res.json();
 
-      clearMapLayers();
-
-      if (!data.coords || !data.coords.length) {
-        setDestination("");
+      if (!data || data.error) {
+        alert("Route not found.");
         return;
       }
 
-      setDestination(data.locations?.[data.locations.length - 1] || "");
+      const originCoords = await fetchCoords(origin);
+      const destCoords = await fetchCoords(destination);
 
-      data.coords.forEach((coord, i) => {
-        const marker = L.marker(coord);
-        marker.bindPopup(data.locations?.[i] || `Point ${i + 1}`);
-        marker.addTo(mapRef.current);
-        markersRef.current.push(marker);
-      });
+      if (!originCoords || !destCoords) return;
 
-      if (data.coords.length >= 2) {
-        routingRef.current = L.Routing.control({
-          waypoints: data.coords.map(c => L.latLng(c[0], c[1])),
-          routeWhileDragging: false,
-          addWaypoints: false,
-          draggableWaypoints: false,
-          fitSelectedRoutes: true,
-          show: false,
-          createMarker: () => null,
-        }).addTo(mapRef.current);
+      if (routingRef.current) {
+        mapRef.current.removeControl(routingRef.current);
       }
-    } catch {
-      setError("Failed to load map data.");
+
+      routingRef.current = L.Routing.control({
+        waypoints: [
+          L.latLng(originCoords.latitude, originCoords.longitude),
+          L.latLng(destCoords.latitude, destCoords.longitude)
+        ],
+        routeWhileDragging: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        show: false,
+        createMarker: () => null
+      }).addTo(mapRef.current);
+
+    } catch (err) {
+      console.error(err);
+      alert("Error loading route.");
     } finally {
       setLoading(false);
     }
-  }, [apiUrl]);
+  };
 
-  useEffect(() => {
-    initMap();
-    updateMap();
-    const interval = setInterval(updateMap, pollingInterval);
-    return () => clearInterval(interval);
-  }, [initMap, updateMap, pollingInterval]);
-
-  // 🧲 Drag Optimization (No glitching, super smooth)
+  // 🧲 Drag widget from header
   useEffect(() => {
     const widget = widgetRef.current;
     const header = widget?.querySelector(".map-destination-header");
     if (!widget || !header) return;
-  
+
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
-  
+
     const onPointerDown = (e) => {
       isDragging = true;
       const rect = widget.getBoundingClientRect();
@@ -127,7 +101,7 @@ export default function MapWidget({ apiUrl = "/api/locations", pollingInterval =
       document.body.style.userSelect = "none";
       header.setPointerCapture(e.pointerId);
     };
-  
+
     const onPointerMove = (e) => {
       if (!isDragging) return;
       const x = e.clientX - offsetX;
@@ -136,24 +110,29 @@ export default function MapWidget({ apiUrl = "/api/locations", pollingInterval =
       widget.style.top = `${y}px`;
       position.current = { x, y };
     };
-  
+
     const onPointerUp = (e) => {
       isDragging = false;
       document.body.style.userSelect = "";
       header.releasePointerCapture(e.pointerId);
     };
-  
+
     header.addEventListener("pointerdown", onPointerDown);
     header.addEventListener("pointermove", onPointerMove);
     header.addEventListener("pointerup", onPointerUp);
-  
+
     return () => {
       header.removeEventListener("pointerdown", onPointerDown);
       header.removeEventListener("pointermove", onPointerMove);
       header.removeEventListener("pointerup", onPointerUp);
     };
-  }, [destination, open]);
-  
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    initMap();
+    drawRoute();
+  }, [open]);
 
   if (!open) return null;
 
@@ -163,19 +142,17 @@ export default function MapWidget({ apiUrl = "/api/locations", pollingInterval =
       ref={widgetRef}
       style={{ left: position.current.x, top: position.current.y }}
     >
-      {destination && (
-        <div className="map-destination-header route-header">
-          <span className="route-title">🧭 Route to {destination}</span>
-          <button
-            onClick={() => setOpen(false)}
-            className="close-map-widget"
-            title="Close Map Widget"
-            aria-label="Close"
-          >
-            &times;
-          </button>
-        </div>
-      )}
+      <div className="map-destination-header route-header">
+        <span>🧭 Route: {origin} → {destination}</span>
+        <button
+          onClick={() => setOpen(false)}
+          className="close-map-widget"
+          title="Close Map Widget"
+          aria-label="Close"
+        >
+          &times;
+        </button>
+      </div>
       <div ref={mapDivRef} className="widget-map"></div>
     </div>
   );

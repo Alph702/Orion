@@ -6,7 +6,7 @@ import json
 from groq import Groq
 from Backend import TTS
 from Backend.RealtimeData import RealTimeInformation
-from Backend.map.map_manager import MapManager
+from Backend.map_manager import MapManager
 
 # Load environment variables from .env
 load_dotenv(dotenv_path='../.env')
