@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0" version="27.2.0">
+  <diagram name="Page-1" id="HxDxlmwB_1F0xbcmXOE1">
+    <mxGraphModel dx="1167" dy="746" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="gLssAuq5GiIfphyj0RQw-2" value="Main" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="378" y="18" width="676" height="659" as="geometry">
+            <mxRectangle x="320" y="135" width="70" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-5" target="gLssAuq5GiIfphyj0RQw-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-5" value="STT" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="10" y="35" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-6" value="TTS" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="420" y="50" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-7" target="gLssAuq5GiIfphyj0RQw-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-7" value="Model" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="240" y="190" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-11" target="gLssAuq5GiIfphyj0RQw-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-11" target="gLssAuq5GiIfphyj0RQw-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-11" value="ChatBot Real Time Data" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="240" y="330" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-16" target="gLssAuq5GiIfphyj0RQw-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="250" />
+              <mxPoint x="230" y="355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-16" value="Weather" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="50" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-17" target="gLssAuq5GiIfphyj0RQw-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="240" />
+              <mxPoint x="410" y="355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-17" value="Search" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="450" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-26" value="ChatBot" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="230" y="510" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-32" target="gLssAuq5GiIfphyj0RQw-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="524" y="539.9999999999998" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="634" y="540" />
+              <mxPoint x="634" y="80" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="gLssAuq5GiIfphyj0RQw-2" source="gLssAuq5GiIfphyj0RQw-26" target="gLssAuq5GiIfphyj0RQw-32">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="427.0000000000002" y="539.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-32" value="Chat Bot history.json" style="shape=internalStorage;whiteSpace=wrap;html=1;backgroundOutline=1;dx=7;dy=17;" vertex="1" parent="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry x="435" y="500" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-3" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="190" width="125" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="gLssAuq5GiIfphyj0RQw-4" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="gLssAuq5GiIfphyj0RQw-3" target="gLssAuq5GiIfphyj0RQw-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="340" as="sourcePoint" />
+            <mxPoint x="290" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
